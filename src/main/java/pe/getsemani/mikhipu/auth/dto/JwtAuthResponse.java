@@ -7,5 +7,5 @@ import lombok.Data;
 @AllArgsConstructor
 public class JwtAuthResponse {
     private String token;
-    private String tokenType = "Bearer";
+    private String tokenType;
 }
