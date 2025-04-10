@@ -34,6 +34,7 @@
 		<maven.compiler.plugin.version>3.11.0</maven.compiler.plugin.version>
 		<spring.boot.maven.plugin.version>${spring.boot.version}</spring.boot.maven.plugin.version>
 		<lombok.version>1.18.30</lombok.version>
+		<open-api.version>2.8.6</open-api.version>
 	</properties>
 
 	<dependencies>
@@ -132,6 +133,13 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-mail</artifactId>
+		</dependency>
+
+		<!-- Springdoc OpenAPI UI -->
+		<dependency>
+			<groupId>org.springdoc</groupId>
+			<artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+			<version>${open-api.version}</version>
 		</dependency>
 	</dependencies>
 
