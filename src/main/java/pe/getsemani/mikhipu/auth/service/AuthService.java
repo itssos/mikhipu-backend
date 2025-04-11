@@ -9,13 +9,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 import pe.getsemani.mikhipu.auth.dto.JwtAuthResponse;
 import pe.getsemani.mikhipu.auth.dto.LoginRequest;
-import pe.getsemani.mikhipu.model.entity.Role;
-import pe.getsemani.mikhipu.model.entity.User;
-import pe.getsemani.mikhipu.repository.RoleRepository;
-import pe.getsemani.mikhipu.repository.UserRepository;
+import pe.getsemani.mikhipu.role.repository.RoleRepository;
+import pe.getsemani.mikhipu.user.repository.UserRepository;
 import pe.getsemani.mikhipu.security.JwtTokenProvider;
-
-import java.util.Collections;
 
 @Service
 public class AuthService {

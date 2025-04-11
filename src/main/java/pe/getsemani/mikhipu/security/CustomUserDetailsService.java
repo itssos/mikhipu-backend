@@ -6,8 +6,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-import pe.getsemani.mikhipu.model.entity.User;
-import pe.getsemani.mikhipu.repository.UserRepository;
+import pe.getsemani.mikhipu.user.entity.User;
+import pe.getsemani.mikhipu.user.repository.UserRepository;
 
 import java.util.List;
 import java.util.stream.Collectors;

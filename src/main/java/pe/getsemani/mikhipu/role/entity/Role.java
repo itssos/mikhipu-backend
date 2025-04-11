@@ -1,4 +1,4 @@
-package pe.getsemani.mikhipu.model.entity;
+package pe.getsemani.mikhipu.role.entity;
 
 
 import jakarta.persistence.Column;

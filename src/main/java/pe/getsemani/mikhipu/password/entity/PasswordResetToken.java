@@ -13,7 +13,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import pe.getsemani.mikhipu.model.entity.User;
+import pe.getsemani.mikhipu.user.entity.User;
 
 import java.time.LocalDateTime;
 

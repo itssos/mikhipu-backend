@@ -12,8 +12,8 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.web.server.ResponseStatusException;
 import pe.getsemani.mikhipu.auth.dto.JwtAuthResponse;
 import pe.getsemani.mikhipu.auth.dto.LoginRequest;
-import pe.getsemani.mikhipu.repository.RoleRepository;
-import pe.getsemani.mikhipu.repository.UserRepository;
+import pe.getsemani.mikhipu.role.repository.RoleRepository;
+import pe.getsemani.mikhipu.user.repository.UserRepository;
 import pe.getsemani.mikhipu.security.JwtTokenProvider;
 
 import static org.assertj.core.api.Assertions.assertThat;
