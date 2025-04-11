@@ -10,7 +10,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
-import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -37,8 +37,7 @@ public class Role {
     private Integer id;
 
     @Enumerated(EnumType.STRING)
-    @NotBlank(message = "Role name must not be blank")
-    @Size(max = 50, message = "Role name must be at most 50 characters")
+    @NotNull(message = "Role name must not be null")
     @Column(name = "name", length = 50, nullable = false, unique = true)
     private RoleType name;
 

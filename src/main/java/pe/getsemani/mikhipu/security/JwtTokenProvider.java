@@ -54,13 +54,8 @@ public class JwtTokenProvider {
 
 
     public boolean validateToken(String token) {
-        try {
-            parseClaims(token);
-            return true;
-        } catch (JwtException | IllegalArgumentException e) {
-            logger.warn("Invalid or expired JWT token: {}", e.getMessage());
-            return false;
-        }
+        parseClaims(token);
+        return true;
     }
 
     private Claims parseClaims(String token) {

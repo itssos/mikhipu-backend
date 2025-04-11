@@ -37,16 +37,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String header = req.getHeader(AUTH_HEADER);
         if (header != null && header.startsWith(TOKEN_PREFIX)) {
             String token = header.substring(TOKEN_PREFIX.length());
-            if (tokenProvider.validateToken(token)) {
-                String username = tokenProvider.getUsername(token);
-                UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-                UsernamePasswordAuthenticationToken auth =
-                        new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-                auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(req));
-                SecurityContextHolder.getContext().setAuthentication(auth);
-            } else {
-                logger.debug("JWT token validation failed for header: {}", header);
-            }
+            tokenProvider.validateToken(token);
+
+            String username = tokenProvider.getUsername(token);
+            UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+            UsernamePasswordAuthenticationToken auth =
+                    new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+            auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(req));
+            SecurityContextHolder.getContext().setAuthentication(auth);
         }
         chain.doFilter(req, res);
     }
