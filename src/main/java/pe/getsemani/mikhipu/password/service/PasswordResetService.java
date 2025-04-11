@@ -7,10 +7,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 import pe.getsemani.mikhipu.email.service.EmailService;
-import pe.getsemani.mikhipu.model.entity.User;
+import pe.getsemani.mikhipu.user.entity.User;
 import pe.getsemani.mikhipu.password.entity.PasswordResetToken;
 import pe.getsemani.mikhipu.password.repository.PasswordResetTokenRepository;
-import pe.getsemani.mikhipu.repository.UserRepository;
+import pe.getsemani.mikhipu.user.repository.UserRepository;
 
 import java.time.LocalDateTime;
 import java.util.UUID;

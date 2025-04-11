@@ -7,13 +7,12 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import pe.getsemani.mikhipu.model.entity.User;
-import pe.getsemani.mikhipu.model.entity.Role;
-import pe.getsemani.mikhipu.repository.UserRepository;
+import pe.getsemani.mikhipu.user.entity.User;
+import pe.getsemani.mikhipu.role.entity.Role;
+import pe.getsemani.mikhipu.user.repository.UserRepository;
 
 import java.util.Collections;
 import java.util.Optional;
-import java.util.Set;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;

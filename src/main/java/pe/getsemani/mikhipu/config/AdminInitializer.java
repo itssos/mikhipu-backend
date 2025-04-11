@@ -7,10 +7,10 @@ import org.springframework.core.env.Environment;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-import pe.getsemani.mikhipu.model.entity.Role;
-import pe.getsemani.mikhipu.model.entity.User;
-import pe.getsemani.mikhipu.repository.RoleRepository;
-import pe.getsemani.mikhipu.repository.UserRepository;
+import pe.getsemani.mikhipu.role.entity.Role;
+import pe.getsemani.mikhipu.user.entity.User;
+import pe.getsemani.mikhipu.role.repository.RoleRepository;
+import pe.getsemani.mikhipu.user.repository.UserRepository;
 
 import java.util.Arrays;
 import java.util.Collections;
