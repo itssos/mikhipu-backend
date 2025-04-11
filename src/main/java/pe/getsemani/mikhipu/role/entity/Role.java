@@ -3,6 +3,8 @@ package pe.getsemani.mikhipu.role.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -15,6 +17,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import pe.getsemani.mikhipu.role.enums.RoleType;
 
 
 @Entity
@@ -33,10 +36,11 @@ public class Role {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
+    @Enumerated(EnumType.STRING)
     @NotBlank(message = "Role name must not be blank")
     @Size(max = 50, message = "Role name must be at most 50 characters")
     @Column(name = "name", length = 50, nullable = false, unique = true)
-    private String name;
+    private RoleType name;
 
     @Size(max = 100, message = "Description must be at most 100 characters")
     @Column(name = "description", length = 100)

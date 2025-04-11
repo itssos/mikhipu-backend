@@ -8,11 +8,11 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import pe.getsemani.mikhipu.role.entity.Role;
+import pe.getsemani.mikhipu.role.enums.RoleType;
 import pe.getsemani.mikhipu.user.entity.User;
 import pe.getsemani.mikhipu.role.repository.RoleRepository;
 import pe.getsemani.mikhipu.user.repository.UserRepository;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -37,15 +37,13 @@ public class AdminInitializer implements ApplicationRunner {
     @Override
     @Transactional
     public void run(ApplicationArguments args) {
-        // 1. Leer credenciales de props/env
+
         String adminUsername = env.getProperty("admin.user.username");
         String adminEmail    = env.getProperty("admin.user.email");
         String adminRawPwd   = env.getProperty("admin.user.password");
 
-        // 2. Asegurar roles base
-        List<Role> requiredRoles = Arrays.asList(
-                new Role(null, "ROLE_ADMIN",  "Administrator role"),
-                new Role(null, "ROLE_USER",   "Default user role")
+        List<Role> requiredRoles = List.of(
+                new Role(null, RoleType.ADMINISTRADOR, "Rol de Administrador")
         );
         for (Role r : requiredRoles) {
             roleRepository.findByName(r.getName())
@@ -57,11 +55,10 @@ public class AdminInitializer implements ApplicationRunner {
                     ));
         }
 
-        // 3. Crear admin si no existe
         if (userRepository.findByUsername(adminUsername).isEmpty()) {
-            Role adminRole = roleRepository.findByName("ROLE_ADMIN")
+            Role adminRole = roleRepository.findByName(RoleType.ADMINISTRADOR)
                     .orElseThrow(() ->
-                            new IllegalStateException("ROLE_ADMIN should have been created")
+                            new IllegalStateException(RoleType.ADMINISTRADOR+" should have been created")
                     );
 
             User admin = User.builder()
