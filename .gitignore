@@ -33,3 +33,7 @@ build/
 .vscode/
 
 .env
+
+### Ignore classes ###
+src/main/java/pe/getsemani/mikhipu/email/controller/
+src/main/java/pe/getsemani/mikhipu/email/dto/
