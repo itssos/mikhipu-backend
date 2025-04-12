@@ -23,6 +23,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @WebMvcTest(AuthController.class)
 @Import(GlobalExceptionHandler.class)
+@DisplayName("Pruebas de AuthController")
 class AuthControllerTest {
 
     @Autowired
@@ -34,7 +35,7 @@ class AuthControllerTest {
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Test
-    @DisplayName("POST /api/auth/login with valid payload returns 200 and JWT")
+    @DisplayName("POST /api/auth/login con payload válido retorna 200 y JWT")
     @WithMockUser
     void login_withValidRequest_returns200AndJwt() throws Exception {
         // Arrange
@@ -58,7 +59,7 @@ class AuthControllerTest {
     }
 
     @Test
-    @DisplayName("POST /api/auth/login with missing username returns 400 and validation message")
+    @DisplayName("POST /api/auth/login sin username retorna 400 y mensaje de validación")
     @WithMockUser
     void login_missingUsername_returns400() throws Exception {
         // Arrange: faltante el campo username
@@ -74,11 +75,11 @@ class AuthControllerTest {
                         .content(payload)
                         .with(csrf()))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.errors.username").value("Username is required"));
+                .andExpect(jsonPath("$.fieldErrors.username").value("Username is required"));
     }
 
     @Test
-    @DisplayName("POST /api/auth/login with missing password returns 400 and validation message")
+    @DisplayName("POST /api/auth/login sin password retorna 400 y mensaje de validación")
     @WithMockUser
     void login_missingPassword_returns400() throws Exception {
         // Arrange: faltante el campo password
@@ -94,11 +95,11 @@ class AuthControllerTest {
                         .content(payload)
                         .with(csrf()))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.errors.password").value("Password is required"));
+                .andExpect(jsonPath("$.fieldErrors.password").value("Password is required"));
     }
 
     @Test
-    @DisplayName("POST /api/auth/login with invalid credentials returns 401")
+    @DisplayName("POST /api/auth/login con credenciales inválidas retorna 401")
     @WithMockUser
     void login_invalidCredentials_returns401() throws Exception {
         // Arrange
@@ -115,6 +116,6 @@ class AuthControllerTest {
                         .content(objectMapper.writeValueAsString(req))
                         .with(csrf()))
                 .andExpect(status().isUnauthorized())
-                .andExpect(status().reason("Bad credentials"));
+                .andExpect(jsonPath("$.error").value("Bad credentials"));
     }
 }
