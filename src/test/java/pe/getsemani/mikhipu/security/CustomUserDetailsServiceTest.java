@@ -1,5 +1,6 @@
 package pe.getsemani.mikhipu.security;
 
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -19,6 +20,7 @@ import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
+@DisplayName("Pruebas de CustomUserDetailsService")
 class CustomUserDetailsServiceTest {
 
     @Mock
@@ -28,6 +30,7 @@ class CustomUserDetailsServiceTest {
     private CustomUserDetailsService service;
 
     @Test
+    @DisplayName("Debe cargar el usuario por nombre de usuario correctamente")
     void shouldLoadUserByUsername() {
         User user = mock(User.class);
         Role role = mock(Role.class);
@@ -47,6 +50,7 @@ class CustomUserDetailsServiceTest {
     }
 
     @Test
+    @DisplayName("Debe lanzar excepción cuando no se encuentra el usuario")
     void shouldThrowWhenUserNotFound() {
         when(userRepository.findByUsername("unknown")).thenReturn(Optional.empty());
 
