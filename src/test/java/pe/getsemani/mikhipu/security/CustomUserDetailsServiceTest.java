@@ -7,6 +7,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import pe.getsemani.mikhipu.role.enums.RoleType;
 import pe.getsemani.mikhipu.user.entity.User;
 import pe.getsemani.mikhipu.role.entity.Role;
 import pe.getsemani.mikhipu.user.repository.UserRepository;
@@ -30,7 +31,7 @@ class CustomUserDetailsServiceTest {
     void shouldLoadUserByUsername() {
         User user = mock(User.class);
         Role role = mock(Role.class);
-        when(role.getName()).thenReturn("ROLE_USER");
+        when(role.getName()).thenReturn(RoleType.ESTUDIANTE);
         when(user.getUsername()).thenReturn("user");
         when(user.getPassword()).thenReturn("pass");
         when(user.getRoles()).thenReturn(Collections.singleton(role));
