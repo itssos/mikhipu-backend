@@ -9,7 +9,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.web.server.ResponseStatusException;
 import pe.getsemani.mikhipu.auth.dto.JwtAuthResponse;
 import pe.getsemani.mikhipu.auth.dto.LoginRequest;
 import pe.getsemani.mikhipu.role.repository.RoleRepository;
@@ -21,6 +20,7 @@ import static org.assertj.core.api.ThrowableAssert.catchThrowableOfType;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
+@DisplayName("Pruebas del AuthService")
 class AuthServiceTest {
 
     @Mock
@@ -42,7 +42,7 @@ class AuthServiceTest {
     private AuthService authService;
 
     @Test
-    @DisplayName("authenticate() with valid credentials returns JWT and type")
+    @DisplayName("con credenciales válidas retorna un JWT y su tipo")
     void authenticate_withValidCredentials_returnsJwtAuthResponse() {
         // Arrange
         String rawUsername = "john.doe";
@@ -65,15 +65,15 @@ class AuthServiceTest {
         assertThat(response.getToken()).isEqualTo("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9");
         assertThat(response.getTokenType()).isEqualTo("Bearer");
 
-        // Verify that AuthenticationManager and TokenProvider were called correctly
+        // Verificamos que se hayan invocado correctamente AuthenticationManager y TokenProvider
         verify(authenticationManager).authenticate(
                 new UsernamePasswordAuthenticationToken(rawUsername, rawPassword));
         verify(tokenProvider).generateToken(fakeAuth);
     }
 
     @Test
-    @DisplayName("authenticate() with bad credentials throws 401 Unauthorized")
-    void authenticate_withBadCredentials_throwsResponseStatusException() {
+    @DisplayName("con credenciales incorrectas lanza BadCredentialsException")
+    void authenticate_withBadCredentials_throwsBadCredentialsException() {
         // Arrange
         LoginRequest request = new LoginRequest();
         request.setUsername("invalid");
@@ -83,11 +83,10 @@ class AuthServiceTest {
                 .thenThrow(new BadCredentialsException("Bad credentials"));
 
         // Act & Assert
-        ResponseStatusException ex = catchThrowableOfType(
+        BadCredentialsException ex = catchThrowableOfType(
                 () -> authService.authenticate(request),
-                ResponseStatusException.class);
+                BadCredentialsException.class);
 
-        assertThat(ex.getStatusCode()).isEqualTo(org.springframework.http.HttpStatus.UNAUTHORIZED);
-        assertThat(ex.getReason()).contains("Bad credentials");
+        assertThat(ex.getMessage()).contains("Bad credentials");
     }
 }
