@@ -1,5 +1,6 @@
 package pe.getsemani.mikhipu.exception;
 
+import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.http.HttpServletRequest;
 import io.jsonwebtoken.JwtException;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -191,20 +192,6 @@ public class GlobalExceptionHandler {
                 null
         );
         return new ResponseEntity<>(errorResponse, HttpStatus.PAYLOAD_TOO_LARGE);
-    }
-
-    // Manejo específico para errores de JWT
-    @ExceptionHandler(JwtException.class)
-    public ResponseEntity<ApiError> handleJwtException(JwtException ex, HttpServletRequest request) {
-        ApiError errorResponse = new ApiError(
-                LocalDateTime.now(),
-                HttpStatus.UNAUTHORIZED.value(),
-                HttpStatus.UNAUTHORIZED.getReasonPhrase(),
-                "JWT error: " + ex.getMessage(),
-                request.getRequestURI(),
-                null
-        );
-        return new ResponseEntity<>(errorResponse, HttpStatus.UNAUTHORIZED);
     }
 
     // Manejador global para cualquier otra excepción no controlada previamente

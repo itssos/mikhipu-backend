@@ -50,7 +50,6 @@ public class User {
     @Column(name = "username", length = 50, nullable = false)
     private String username;
 
-    @NotBlank(message = "Email must not be blank")
     @Email(message = "Email should be valid")
     @Size(max = 50, message = "Email must be at most 50 characters")
     @Column(name = "email", length = 50)

@@ -1,5 +1,6 @@
 package pe.getsemani.mikhipu.person.entity;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -70,7 +71,7 @@ public abstract class Person {
     @Column(name = "phone", length = 15)
     private String phone;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
     @JoinColumn(name = "user_id", unique = true)
     private User user;
 }
