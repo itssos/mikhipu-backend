@@ -29,6 +29,7 @@
 		<jjwt.version>0.11.5</jjwt.version>
 		<assertj.version>3.24.2</assertj.version>
 		<mockito.version>5.6.0</mockito.version>
+		<apache-poi.version>5.2.3</apache-poi.version>
 
 		<!-- Plugin versions -->
 		<maven.compiler.plugin.version>3.11.0</maven.compiler.plugin.version>
@@ -140,6 +141,13 @@
 			<groupId>org.springdoc</groupId>
 			<artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
 			<version>${open-api.version}</version>
+		</dependency>
+
+		<!-- Apache POI -->
+		<dependency>
+			<groupId>org.apache.poi</groupId>
+			<artifactId>poi-ooxml</artifactId>
+			<version>${apache-poi.version}</version>
 		</dependency>
 	</dependencies>
 

@@ -1,5 +1,6 @@
 package pe.getsemani.mikhipu.security;
 
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -7,6 +8,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import pe.getsemani.mikhipu.role.enums.RoleType;
 import pe.getsemani.mikhipu.user.entity.User;
 import pe.getsemani.mikhipu.role.entity.Role;
 import pe.getsemani.mikhipu.user.repository.UserRepository;
@@ -18,6 +20,7 @@ import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
+@DisplayName("Pruebas de CustomUserDetailsService")
 class CustomUserDetailsServiceTest {
 
     @Mock
@@ -27,10 +30,11 @@ class CustomUserDetailsServiceTest {
     private CustomUserDetailsService service;
 
     @Test
+    @DisplayName("Debe cargar el usuario por nombre de usuario correctamente")
     void shouldLoadUserByUsername() {
         User user = mock(User.class);
         Role role = mock(Role.class);
-        when(role.getName()).thenReturn("ROLE_USER");
+        when(role.getName()).thenReturn(RoleType.ESTUDIANTE);
         when(user.getUsername()).thenReturn("user");
         when(user.getPassword()).thenReturn("pass");
         when(user.getRoles()).thenReturn(Collections.singleton(role));
@@ -46,6 +50,7 @@ class CustomUserDetailsServiceTest {
     }
 
     @Test
+    @DisplayName("Debe lanzar excepción cuando no se encuentra el usuario")
     void shouldThrowWhenUserNotFound() {
         when(userRepository.findByUsername("unknown")).thenReturn(Optional.empty());
 

@@ -3,6 +3,7 @@ package pe.getsemani.mikhipu.security;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.security.SignatureException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -51,6 +52,26 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                         new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
                 auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(req));
                 SecurityContextHolder.getContext().setAuthentication(auth);
+            } catch (ExpiredJwtException ex) {
+                // Configuramos el ObjectMapper para que pueda serializar LocalDateTime
+                ObjectMapper mapper = new ObjectMapper();
+                mapper.registerModule(new JavaTimeModule());
+                mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+
+                ApiError errorResponse = new ApiError(
+                        LocalDateTime.now(),
+                        HttpStatus.UNAUTHORIZED.value(),
+                        HttpStatus.UNAUTHORIZED.getReasonPhrase(),
+                        ex.getMessage(),
+                        req.getRequestURI(),
+                        null
+                );
+                res.setStatus(HttpStatus.UNAUTHORIZED.value());
+                res.setContentType("application/json");
+                mapper.writeValue(res.getOutputStream(), errorResponse);
+                return;
+
+
             } catch (SignatureException ex) {
                 // Configuramos el ObjectMapper para que pueda serializar LocalDateTime
                 ObjectMapper mapper = new ObjectMapper();
