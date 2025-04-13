@@ -54,12 +54,12 @@ public class PasswordResetService {
                     .build();
             tokenRepository.save(prt);
 
-            String resetLink = frontendBaseUrl + "/reset-password?token=" + token;
+            String resetLink = frontendBaseUrl + "auth/reset-password?token=" + token;
             String htmlBody = buildResetPasswordEmailBody(resetLink);
 
             emailService.sendHtmlEmail(
                     user.getEmail(),
-                    "Reset Your Password",
+                    "Restablezca su contraseña",
                     htmlBody
             );
         });
@@ -95,17 +95,17 @@ public class PasswordResetService {
                       <h1 style="margin:0;font-size:24px">Reset Your Password</h1>
                     </td></tr>
                     <tr><td style="padding:20px;color:#333">
-                      <p>Hello,</p>
-                      <p>You requested a password reset. Click the button below:</p>
+                      <p>Hola,</p>
+                      <p>Has solicitado restablecer tu contraseña. Haz clic en el botón de abajo:</p>
                       <p style="text-align:center;margin:30px 0">
                         <a href="%s" style="background:#4CAF50;color:#fff;text-decoration:none;padding:12px 24px;border-radius:4px;display:inline-block;font-size:16px">
-                          Reset Password
+                          Restablecer contraseña
                         </a>
                       </p>
-                      <p>This link will expire in 1 hour. If you did not request this, ignore this email.</p>
+                      <p>Este enlace caducará en 1 hora. Si no lo solicitaste, ignora este correo electrónico.</p>
                     </td></tr>
                     <tr><td style="background:#f9f9f9;padding:15px;font-size:12px;color:#777">
-                      <p>If the button doesn't work, copy and paste this URL:</p>
+                      <p>Si el botón no funciona, copie y pegue esta URL:</p>
                       <p><a href="%s" style="color:#4CAF50;word-break:break-all">%s</a></p>
                     </td></tr>
                   </table>
