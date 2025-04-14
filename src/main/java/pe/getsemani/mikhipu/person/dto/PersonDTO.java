@@ -1,6 +1,7 @@
 package pe.getsemani.mikhipu.person.dto;
 
 import lombok.Data;
+import pe.getsemani.mikhipu.user.dto.UserDTO;
 
 import java.time.LocalDate;
 
@@ -14,4 +15,6 @@ public class PersonDTO {
     private String gender;
     private String address;
     private String phone;
+
+    private UserDTO user;
 }
