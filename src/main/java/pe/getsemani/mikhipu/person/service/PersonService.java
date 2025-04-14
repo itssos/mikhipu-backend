@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -40,7 +41,7 @@ public class PersonService {
 
     @Transactional(readOnly = true)
     public List<PersonDTO> getAllPersons() {
-        List<Person> persons = personRepository.findAll();
+        List<Person> persons = personRepository.findAll(Sort.by(Sort.Direction.DESC, "id"));
         return persons.stream()
                 .map(PersonMapper::mapPersonToDTO)
                 .collect(Collectors.toList());
@@ -169,6 +170,10 @@ public class PersonService {
     public void deletePerson(Long id) {
         Person existing = personRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Person not found with id " + id));
+
+        if (existing.getUser() != null) {
+            userRepository.delete(existing.getUser());
+        }
         personRepository.delete(existing);
     }
 }
