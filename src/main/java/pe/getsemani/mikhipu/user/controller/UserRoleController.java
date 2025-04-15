@@ -25,7 +25,7 @@ public class UserRoleController {
     @PutMapping("/{userId}/role")
     public ResponseEntity<User> assignRoleToUser(@PathVariable Integer userId,
                                                  @Valid @RequestBody RoleAssignmentDTO roleAssignmentDTO) {
-        User updatedUser = userService.assignRole(userId, roleAssignmentDTO.getRoleType());
+        User updatedUser = userService.assignRole(userId, roleAssignmentDTO.getRole());
         return new ResponseEntity<>(updatedUser, HttpStatus.OK);
     }
 }

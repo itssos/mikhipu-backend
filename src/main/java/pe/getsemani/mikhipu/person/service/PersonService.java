@@ -18,7 +18,6 @@ import pe.getsemani.mikhipu.person.enums.SchoolLevel;
 import pe.getsemani.mikhipu.person.mapper.PersonMapper;
 import pe.getsemani.mikhipu.person.repository.PersonRepository;
 import pe.getsemani.mikhipu.role.entity.Role;
-import pe.getsemani.mikhipu.role.enums.RoleType;
 import pe.getsemani.mikhipu.role.repository.RoleRepository;
 import pe.getsemani.mikhipu.user.entity.User;
 import pe.getsemani.mikhipu.user.dto.UserCreateDTO;
@@ -50,7 +49,7 @@ public class PersonService {
     @Transactional(readOnly = true)
     public PersonDTO getPersonById(Long id) {
         Person person = personRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Person not found with id " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("No se encontro la persona con ID: " + id));
         return PersonMapper.mapPersonToDTO(person);
     }
 
@@ -81,8 +80,8 @@ public class PersonService {
                 // Si se envían roles, asignarlos convirtiendo de String a Role
                 if (userDto.getRoles() != null && !userDto.getRoles().isEmpty()) {
                     Set<Role> roles = userDto.getRoles().stream()
-                            .map(roleStr -> roleRepository.findByName(RoleType.valueOf(roleStr))
-                                    .orElseThrow(() -> new ResourceNotFoundException("Role not found: " + roleStr)))
+                            .map(roleStr -> roleRepository.findByName(roleStr)
+                                    .orElseThrow(() -> new ResourceNotFoundException("No se encontro el rol:  " + roleStr)))
                             .collect(Collectors.toSet());
                     newUser.setRoles(roles);
                 }
@@ -95,7 +94,7 @@ public class PersonService {
             }
             person = student;
         } else {
-            throw new IllegalArgumentException("Unsupported person type: " + dto.getType());
+            throw new IllegalArgumentException("Tipo de persona no soportado: " + dto.getType());
         }
         Person saved = personRepository.save(person);
         return PersonMapper.mapPersonToDTO(saved);
@@ -104,7 +103,7 @@ public class PersonService {
     @Transactional
     public PersonDTO updatePerson(Long id, PersonCreateDTO dto) {
         Person existing = personRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Person not found with id " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("No se encontro la persona con ID: " + id));
         // Actualización de campos comunes
         existing.setFirstName(dto.getFirstName());
         existing.setLastName(dto.getLastName());
@@ -137,8 +136,8 @@ public class PersonService {
                     }
                     if (userDto.getRoles() != null && !userDto.getRoles().isEmpty()) {
                         Set<Role> roles = userDto.getRoles().stream()
-                                .map(roleStr -> roleRepository.findByName(RoleType.valueOf(roleStr))
-                                        .orElseThrow(() -> new ResourceNotFoundException("Role not found: " + roleStr)))
+                                .map(roleStr -> roleRepository.findByName(roleStr)
+                                        .orElseThrow(() -> new ResourceNotFoundException("No se encontro el rol: " + roleStr)))
                                 .collect(Collectors.toSet());
                         userEntity.setRoles(roles);
                     }
@@ -150,16 +149,16 @@ public class PersonService {
                     newUser.setPassword(passwordEncoder.encode(userDto.getPassword() != null ? userDto.getPassword() : dto.getDni()));
                     if (userDto.getRoles() != null && !userDto.getRoles().isEmpty()) {
                         Set<Role> roles = userDto.getRoles().stream()
-                                .map(roleStr -> roleRepository.findByName(RoleType.valueOf(roleStr))
-                                        .orElseThrow(() -> new ResourceNotFoundException("Role not found: " + roleStr)))
+                                .map(roleStr -> roleRepository.findByName(roleStr)
+                                        .orElseThrow(() -> new ResourceNotFoundException("No se encontro el rol: " + roleStr)))
                                 .collect(Collectors.toSet());
                         newUser.setRoles(roles);
                     }
                     student.setUser(newUser);
                 }
             }
-        } else if (!"STUDENT".equalsIgnoreCase(dto.getType())) {
-            throw new IllegalArgumentException("Unsupported person type for update: " + dto.getType());
+        } else if (!"ESTUDIANTE".equalsIgnoreCase(dto.getType())) {
+            throw new IllegalArgumentException("Tipo de persona no soportado: " + dto.getType());
         }
 
         Person updated = personRepository.save(existing);
@@ -169,7 +168,7 @@ public class PersonService {
     @Transactional
     public void deletePerson(Long id) {
         Person existing = personRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Person not found with id " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("No se encontro la persona con ID: " + id));
 
         if (existing.getUser() != null) {
             userRepository.delete(existing.getUser());

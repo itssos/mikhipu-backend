@@ -1,11 +1,12 @@
 package pe.getsemani.mikhipu.user.dto;
 
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
-import pe.getsemani.mikhipu.role.enums.RoleType;
 
 @Data
 public class RoleAssignmentDTO {
-    @NotNull(message = "Role type must be provided")
-    private RoleType roleType;
+    @NotEmpty(message = "El rol no debe estar vacio")
+    @NotNull(message = "El rol no debe ser nulo")
+    private String role;
 }

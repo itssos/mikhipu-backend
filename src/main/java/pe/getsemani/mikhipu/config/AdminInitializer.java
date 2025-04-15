@@ -1,4 +1,3 @@
-
 package pe.getsemani.mikhipu.config;
 
 import org.springframework.boot.ApplicationArguments;
@@ -8,7 +7,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import pe.getsemani.mikhipu.role.entity.Role;
-import pe.getsemani.mikhipu.role.enums.RoleType;
 import pe.getsemani.mikhipu.user.entity.User;
 import pe.getsemani.mikhipu.role.repository.RoleRepository;
 import pe.getsemani.mikhipu.user.repository.UserRepository;
@@ -43,23 +41,33 @@ public class AdminInitializer implements ApplicationRunner {
         String adminRawPwd   = env.getProperty("admin.user.password");
 
         List<Role> requiredRoles = List.of(
-                new Role(null, RoleType.ADMINISTRADOR, "Rol de Administrador")
+                new Role(null, "ADMINISTRADOR", "Rol de Administrador"),
+                new Role(null, "ESTUDIANTE", "Rol de Estudiante"),
+                new Role(null, "DOCENTE", "Rol de Docente"),
+                new Role(null, "APODERADO", "Rol de Apoderado")
         );
-        for (Role r : requiredRoles) {
-            roleRepository.findByName(r.getName())
-                    .orElseGet(() -> roleRepository.save(
-                            Role.builder()
-                                    .name(r.getName())
-                                    .description(r.getDescription())
-                                    .build()
-                    ));
-        }
 
+        // Para cada rol requerido, si no existe se crea, de lo contrario se notifica su existencia.
+        requiredRoles.forEach(role ->
+                roleRepository.findByName(role.getName())
+                        .ifPresentOrElse(
+                                existingRole -> System.out.println("✔ Role already exists: " + existingRole.getName()),
+                                () -> {
+                                    Role savedRole = roleRepository.save(
+                                            Role.builder()
+                                                    .name(role.getName())
+                                                    .description(role.getDescription())
+                                                    .build()
+                                    );
+                                    System.out.println("✔ Created role: " + savedRole.getName());
+                                }
+                        )
+        );
+
+        // Crear el usuario admin solo si no existe
         if (userRepository.findByUsername(adminUsername).isEmpty()) {
-            Role adminRole = roleRepository.findByName(RoleType.ADMINISTRADOR)
-                    .orElseThrow(() ->
-                            new IllegalStateException(RoleType.ADMINISTRADOR+" should have been created")
-                    );
+            Role adminRole = roleRepository.findByName("ADMINISTRADOR")
+                    .orElseThrow(() -> new IllegalStateException("ADMINISTRADOR should have been created"));
 
             User admin = User.builder()
                     .username(adminUsername)

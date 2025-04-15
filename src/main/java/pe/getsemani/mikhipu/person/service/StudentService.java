@@ -19,7 +19,6 @@ import pe.getsemani.mikhipu.person.enums.Section;
 import pe.getsemani.mikhipu.person.dto.UploadResponse;
 import pe.getsemani.mikhipu.user.entity.User;
 import pe.getsemani.mikhipu.role.entity.Role;
-import pe.getsemani.mikhipu.role.enums.RoleType;
 import pe.getsemani.mikhipu.exception.ResourceNotFoundException;
 import pe.getsemani.mikhipu.person.repository.StudentRepository;
 import pe.getsemani.mikhipu.user.repository.UserRepository;
@@ -92,7 +91,7 @@ public class StudentService {
                         user.setUsername(student.getDni());
                         user.setPassword(passwordEncoder.encode(student.getDni())); // Se recomienda encriptar la contraseña en producción.
                         // Buscar el rol de ESTUDIANTE.
-                        Role estudianteRole = roleRepository.findByName(RoleType.ESTUDIANTE)
+                        Role estudianteRole = roleRepository.findByName("ESTUDIANTE")
                                 .orElseThrow(() -> new ResourceNotFoundException("No se encontró el rol de estudiante para el DNI: " + student.getDni()));
                         if (estudianteRole == null) {
                             errors.add("Fila " + (i + 1) + " - No se encontró el rol de estudiante para el DNI: " + student.getDni());
@@ -150,7 +149,7 @@ public class StudentService {
                     User user = new User();
                     user.setUsername(student.getDni());
                     user.setPassword(passwordEncoder.encode(student.getDni()));
-                    Role estudianteRole = roleRepository.findByName(RoleType.ESTUDIANTE)
+                    Role estudianteRole = roleRepository.findByName("ESTUDIANTE")
                             .orElseThrow(() -> new ResourceNotFoundException("No se encontró el rol de estudiante para el DNI: " + student.getDni()));
                     if (estudianteRole == null) {
                         errors.add("No se encontró el rol de estudiante para el DNI: " + student.getDni());
@@ -229,7 +228,7 @@ public class StudentService {
             User user = new User();
             user.setUsername(student.getDni());
             user.setPassword(passwordEncoder.encode(student.getDni()));
-            Role estudianteRole = roleRepository.findByName(RoleType.ESTUDIANTE)
+            Role estudianteRole = roleRepository.findByName("ESTUDIANTE")
                     .orElseThrow(() -> new ResourceNotFoundException("No se encontró el rol de estudiante para el DNI: " + student.getDni()));
             if (estudianteRole != null) {
                 user.setRoles(Collections.singleton(estudianteRole));
