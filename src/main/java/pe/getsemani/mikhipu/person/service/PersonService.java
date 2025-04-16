@@ -13,6 +13,7 @@ import pe.getsemani.mikhipu.person.dto.PersonCreateDTO;
 import pe.getsemani.mikhipu.person.dto.PersonDTO;
 import pe.getsemani.mikhipu.person.entity.Person;
 import pe.getsemani.mikhipu.person.entity.Student;
+import pe.getsemani.mikhipu.person.enums.Gender;
 import pe.getsemani.mikhipu.person.enums.Section;
 import pe.getsemani.mikhipu.person.enums.SchoolLevel;
 import pe.getsemani.mikhipu.person.mapper.PersonMapper;
@@ -63,7 +64,7 @@ public class PersonService {
             student.setLastName(dto.getLastName());
             student.setDni(dto.getDni());
             student.setBirthDate(dto.getBirthDate());
-            student.setGender(dto.getGender());
+            student.setGender(Gender.valueOf(dto.getGender()));
             student.setAddress(dto.getAddress());
             student.setPhone(dto.getPhone());
             // Campos específicos de Student
@@ -109,7 +110,7 @@ public class PersonService {
         existing.setLastName(dto.getLastName());
         existing.setDni(dto.getDni());
         existing.setBirthDate(dto.getBirthDate());
-        existing.setGender(dto.getGender());
+        existing.setGender(Gender.valueOf(dto.getGender()));
         existing.setAddress(dto.getAddress());
         existing.setPhone(dto.getPhone());
 

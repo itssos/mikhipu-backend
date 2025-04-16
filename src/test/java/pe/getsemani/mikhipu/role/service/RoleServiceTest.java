@@ -119,7 +119,7 @@ class RoleServiceTest {
     @DisplayName("getRoleByType() debe retornar rol por tipo")
     void getRoleByType_existingType_returnsRole() {
         Role role = sampleRole();
-        when(roleRepository.findByName(RoleType.ADMINISTRADOR)).thenReturn(Optional.of(role));
+        when(roleRepository.findByName("ADMINISTRADOR")).thenReturn(Optional.of(role));
 
         Role result = roleService.getRoleByType(RoleType.ADMINISTRADOR);
 
@@ -129,7 +129,7 @@ class RoleServiceTest {
     @Test
     @DisplayName("getRoleByType() lanza excepción si no encuentra el tipo")
     void getRoleByType_nonExistingType_throwsException() {
-        when(roleRepository.findByName(RoleType.ESTUDIANTE)).thenReturn(Optional.empty());
+        when(roleRepository.findByName("ESTUDIANTE")).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> roleService.getRoleByType(RoleType.ESTUDIANTE))
                 .isInstanceOf(ResourceNotFoundException.class)

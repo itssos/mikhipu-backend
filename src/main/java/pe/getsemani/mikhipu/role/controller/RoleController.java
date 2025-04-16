@@ -1,6 +1,5 @@
 package pe.getsemani.mikhipu.role.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -17,45 +16,44 @@ import pe.getsemani.mikhipu.role.service.RoleService;
 import jakarta.validation.Valid;
 import java.util.List;
 
-@PreAuthorize("hasRole('ADMINISTRADOR')")
 @RestController
 @RequestMapping("/api/roles")
 public class RoleController {
 
     private final RoleService roleService;
-
-    @Autowired
-    public RoleController(RoleService roleService){
+    public RoleController(RoleService roleService) {
         this.roleService = roleService;
     }
 
     @PostMapping
+    @PreAuthorize("hasAuthority('CREATE_ROLE')")
     public ResponseEntity<Role> createRole(@Valid @RequestBody Role role) {
-        Role created = roleService.createRole(role);
-        return new ResponseEntity<>(created, HttpStatus.CREATED);
+        return ResponseEntity.status(HttpStatus.CREATED).body(roleService.createRole(role));
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasAuthority('GET_ROLE')")
     public ResponseEntity<Role> getRoleById(@PathVariable Integer id) {
-        Role role = roleService.getRoleById(id);
-        return new ResponseEntity<>(role, HttpStatus.OK);
+        return ResponseEntity.ok(roleService.getRoleById(id));
     }
 
     @GetMapping
+    @PreAuthorize("hasAuthority('GET_ROLES')")
     public ResponseEntity<List<Role>> getAllRoles() {
-        List<Role> roles = roleService.getAllRoles();
-        return new ResponseEntity<>(roles, HttpStatus.OK);
+        return ResponseEntity.ok(roleService.getAllRoles());
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Role> updateRole(@PathVariable Integer id, @Valid @RequestBody Role roleDetails) {
-        Role updated = roleService.updateRole(id, roleDetails);
-        return new ResponseEntity<>(updated, HttpStatus.OK);
+    @PreAuthorize("hasAuthority('UPDATE_ROLE')")
+    public ResponseEntity<Role> updateRole(@PathVariable Integer id,
+                                           @Valid @RequestBody Role roleDetails) {
+        return ResponseEntity.ok(roleService.updateRole(id, roleDetails));
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAuthority('DELETE_ROLE')")
     public ResponseEntity<Void> deleteRole(@PathVariable Integer id) {
         roleService.deleteRole(id);
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        return ResponseEntity.noContent().build();
     }
 }

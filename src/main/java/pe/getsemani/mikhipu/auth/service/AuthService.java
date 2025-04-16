@@ -53,18 +53,21 @@ public class AuthService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
 
         // Mapear User a UserDTO y extraer sus roles
-        UserDTO userDTO = new UserDTO();
-        userDTO.setId(userEntity.getId());
-        userDTO.setUsername(userEntity.getUsername());
-        userDTO.setEmail(userEntity.getEmail());
-        userDTO.setRoles(userEntity.getRoles().stream()
-                .map(role -> role.getName().toString())
-                .collect(Collectors.toSet()));
+//        UserDTO userDTO = new UserDTO();
+//        userDTO.setId(userEntity.getId());
+//        userDTO.setUsername(userEntity.getUsername());
+//        userDTO.setEmail(userEntity.getEmail());
+//        userDTO.setPermissions(
+//                userEntity.getRoles().stream()
+//                        .flatMap(role -> role.getPermissions().stream())
+//                        .map(permission -> permission.getName())
+//                        .collect(Collectors.toSet())
+//        );
 
         // Intentar obtener la entidad Person (puede ser de cualquier subclase), o null si no existe.
         Optional<Person> personOptional = personRepository.findByUserUsername(request.getUsername());
         PersonDTO personDTO = personOptional.map(PersonMapper::mapPersonToDTO).orElse(null);
 
-        return new JwtAuthResponse(jwt, TOKEN_TYPE, personDTO, userDTO);
+        return new JwtAuthResponse(jwt, TOKEN_TYPE, personDTO);
     }
 }

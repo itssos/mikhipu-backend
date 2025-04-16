@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
 import pe.getsemani.mikhipu.person.entity.Student;
+import pe.getsemani.mikhipu.person.enums.Gender;
 import pe.getsemani.mikhipu.person.enums.SchoolLevel;
 import pe.getsemani.mikhipu.person.enums.Section;
 import pe.getsemani.mikhipu.person.dto.UploadResponse;
@@ -183,7 +184,7 @@ public class StudentService {
         student.setDni(getCellValueAsString(row.getCell(2)));
         // Se espera que la fecha esté en formato ISO (yyyy-MM-dd) o se puede ajustar según el formato que manejes.
         student.setBirthDate(LocalDate.parse(getCellValueAsString(row.getCell(3))));
-        student.setGender(getCellValueAsString(row.getCell(4)));
+        student.setGender(Gender.valueOf(getCellValueAsString(row.getCell(4))));
         student.setAddress(getCellValueAsString(row.getCell(5)));
         student.setPhone(getCellValueAsString(row.getCell(6)));
         student.setGrade(Integer.parseInt(getCellValueAsString(row.getCell(7))));

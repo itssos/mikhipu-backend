@@ -8,5 +8,5 @@ public class UserDTO {
     private Integer id;
     private String username;
     private String email;
-    private Set<String> roles;
+    private Set<String> permissions;
 }

@@ -16,44 +16,44 @@ import pe.getsemani.mikhipu.person.dto.PersonCreateDTO;
 import pe.getsemani.mikhipu.person.dto.PersonDTO;
 import pe.getsemani.mikhipu.person.service.PersonService;
 
-@PreAuthorize("hasAnyRole('ADMINISTRADOR','DOCENTE')")
 @RestController
 @RequestMapping("/api/persons")
 public class PersonController {
 
     private final PersonService personService;
-
     public PersonController(PersonService personService) {
         this.personService = personService;
     }
 
     @GetMapping
+    @PreAuthorize("hasAuthority('GET_PERSONS')")
     public ResponseEntity<List<PersonDTO>> getAllPersons() {
-        List<PersonDTO> persons = personService.getAllPersons();
-        return new ResponseEntity<>(persons, HttpStatus.OK);
+        return ResponseEntity.ok(personService.getAllPersons());
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasAuthority('GET_PERSON')")
     public ResponseEntity<PersonDTO> getPersonById(@PathVariable Long id) {
-        PersonDTO dto = personService.getPersonById(id);
-        return new ResponseEntity<>(dto, HttpStatus.OK);
+        return ResponseEntity.ok(personService.getPersonById(id));
     }
 
     @PostMapping
+    @PreAuthorize("hasAuthority('CREATE_PERSON')")
     public ResponseEntity<PersonDTO> createPerson(@RequestBody PersonCreateDTO dto) {
-        PersonDTO created = personService.createPerson(dto);
-        return new ResponseEntity<>(created, HttpStatus.CREATED);
+        return ResponseEntity.status(HttpStatus.CREATED).body(personService.createPerson(dto));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<PersonDTO> updatePerson(@PathVariable Long id, @RequestBody PersonCreateDTO dto) {
-        PersonDTO updated = personService.updatePerson(id, dto);
-        return new ResponseEntity<>(updated, HttpStatus.OK);
+    @PreAuthorize("hasAuthority('UPDATE_PERSON')")
+    public ResponseEntity<PersonDTO> updatePerson(@PathVariable Long id,
+                                                  @RequestBody PersonCreateDTO dto) {
+        return ResponseEntity.ok(personService.updatePerson(id, dto));
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAuthority('DELETE_PERSON')")
     public ResponseEntity<Void> deletePerson(@PathVariable Long id) {
         personService.deletePerson(id);
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        return ResponseEntity.noContent().build();
     }
 }

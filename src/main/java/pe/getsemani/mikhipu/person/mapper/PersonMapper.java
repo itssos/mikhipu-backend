@@ -19,7 +19,7 @@ public class PersonMapper {
             dto.setLastName(student.getLastName());
             dto.setDni(student.getDni());
             dto.setBirthDate(student.getBirthDate());
-            dto.setGender(student.getGender());
+            dto.setGender(String.valueOf(student.getGender()));
             dto.setAddress(student.getAddress());
             dto.setPhone(student.getPhone());
             // Mapear campos específicos de Student
@@ -32,9 +32,12 @@ public class PersonMapper {
                 userDto.setId(student.getUser().getId());
                 userDto.setUsername(student.getUser().getUsername());
                 userDto.setEmail(student.getUser().getEmail());
-                userDto.setRoles(student.getUser().getRoles().stream()
-                        .map(role -> role.getName().toString())
-                        .collect(Collectors.toSet()));
+                userDto.setPermissions(
+                        person.getUser().getRoles().stream()
+                                .flatMap(role -> role.getPermissions().stream())
+                                .map(permission -> permission.getName())
+                                .collect(Collectors.toSet())
+                );
                 dto.setUser(userDto);
             }
             return dto;
@@ -46,7 +49,7 @@ public class PersonMapper {
             dto.setLastName(person.getLastName());
             dto.setDni(person.getDni());
             dto.setBirthDate(person.getBirthDate());
-            dto.setGender(person.getGender());
+            dto.setGender(String.valueOf(person.getGender()));
             dto.setAddress(person.getAddress());
             dto.setPhone(person.getPhone());
             if (person.getUser() != null) {
@@ -54,9 +57,12 @@ public class PersonMapper {
                 userDto.setId(person.getUser().getId());
                 userDto.setUsername(person.getUser().getUsername());
                 userDto.setEmail(person.getUser().getEmail());
-                userDto.setRoles(person.getUser().getRoles().stream()
-                        .map(role -> role.getName().toString())
-                        .collect(Collectors.toSet()));
+                userDto.setPermissions(
+                        person.getUser().getRoles().stream()
+                                .flatMap(role -> role.getPermissions().stream())
+                                .map(permission -> permission.getName())
+                                .collect(Collectors.toSet())
+                );
                 dto.setUser(userDto);
             }
             return dto;

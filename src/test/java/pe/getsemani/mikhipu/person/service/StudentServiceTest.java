@@ -115,8 +115,8 @@ class StudentServiceTest {
         // Simular la búsqueda del rol de ESTUDIANTE
         Role role = new Role();
         role.setId(1);
-        role.setName(RoleType.ESTUDIANTE);
-        when(roleRepository.findByName(RoleType.ESTUDIANTE)).thenReturn(Optional.of(role));
+        role.setName("ESTUDIANTE");
+        when(roleRepository.findByName("ESTUDIANTE")).thenReturn(Optional.of(role));
         // Simular la persistencia del estudiante
         when(studentRepository.save(student)).thenAnswer(invocation -> {
             Student s = invocation.getArgument(0);

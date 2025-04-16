@@ -3,6 +3,8 @@ package pe.getsemani.mikhipu.person.entity;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -21,6 +23,7 @@ import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import pe.getsemani.mikhipu.person.enums.Gender;
 import pe.getsemani.mikhipu.user.entity.User;
 import java.time.LocalDate;
 
@@ -58,10 +61,10 @@ public abstract class Person {
     @Column(name = "birth_date", nullable = false)
     private LocalDate birthDate;
 
-    @NotBlank(message = "El género es obligatorio")
-    @Size(max = 10, message = "El género puede tener hasta 10 caracteres")
+    @NotNull(message = "El género es obligatorio")
+    @Enumerated(EnumType.STRING)
     @Column(name = "gender", nullable = false, length = 10)
-    private String gender;
+    private Gender gender;
 
     @Size(max = 100, message = "La dirección puede tener hasta 100 caracteres")
     @Column(name = "address", length = 100)
