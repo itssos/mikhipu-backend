@@ -98,7 +98,7 @@ public class StudentService {
                             errors.add("Fila " + (i + 1) + " - No se encontró el rol de estudiante para el DNI: " + student.getDni());
                             continue;
                         }
-                        user.setRoles(Collections.singleton(estudianteRole));
+                        user.setRole(estudianteRole);
                         student.setUser(user);
                     }
 
@@ -156,7 +156,7 @@ public class StudentService {
                         errors.add("No se encontró el rol de estudiante para el DNI: " + student.getDni());
                         continue;
                     }
-                    user.setRoles(Collections.singleton(estudianteRole));
+                    user.setRole(estudianteRole);
                     student.setUser(user);
                 }
                 studentRepository.save(student);
@@ -232,7 +232,7 @@ public class StudentService {
             Role estudianteRole = roleRepository.findByName("ESTUDIANTE")
                     .orElseThrow(() -> new ResourceNotFoundException("No se encontró el rol de estudiante para el DNI: " + student.getDni()));
             if (estudianteRole != null) {
-                user.setRoles(Collections.singleton(estudianteRole));
+                user.setRole(estudianteRole);
             }
             student.setUser(user);
         }

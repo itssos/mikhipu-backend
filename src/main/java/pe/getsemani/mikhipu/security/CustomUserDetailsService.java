@@ -6,6 +6,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import pe.getsemani.mikhipu.role.entity.Role;
 import pe.getsemani.mikhipu.user.entity.User;
 import pe.getsemani.mikhipu.user.repository.UserRepository;
 
@@ -30,17 +31,13 @@ public class CustomUserDetailsService implements UserDetailsService {
                 .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado: " + username));
 
         // 1) Role-based authorities
-        Set<GrantedAuthority> authorities = user.getRoles().stream()
-                .flatMap(role -> {
-                    Stream<GrantedAuthority> roleAuth = Stream.of(
-                            new SimpleGrantedAuthority("ROLE_" + role.getName())
-                    );
-                    // 2) Permission-based authorities
-                    Stream<GrantedAuthority> permAuth = role.getPermissions().stream()
-                            .map(perm -> new SimpleGrantedAuthority(perm.getName()));
-                    return Stream.concat(roleAuth, permAuth);
-                })
-                .collect(Collectors.toSet());
+        Role role = user.getRole();
+
+        Set<GrantedAuthority> authorities = Stream.concat(
+                Stream.of(new SimpleGrantedAuthority("ROLE_" + role.getName())),
+                role.getPermissions().stream()
+                        .map(perm -> new SimpleGrantedAuthority(perm.getName()))
+        ).collect(Collectors.toSet());
 
         return org.springframework.security.core.userdetails.User.builder()
                 .username(user.getUsername())

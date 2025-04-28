@@ -5,6 +5,8 @@ import pe.getsemani.mikhipu.person.dto.PersonDTO;
 import pe.getsemani.mikhipu.person.dto.StudentDTO;
 import pe.getsemani.mikhipu.person.entity.Person;
 import pe.getsemani.mikhipu.person.entity.Student;
+import pe.getsemani.mikhipu.role.entity.Permission;
+import pe.getsemani.mikhipu.role.entity.Role;
 import pe.getsemani.mikhipu.user.dto.UserDTO;
 
 public class PersonMapper {
@@ -32,10 +34,10 @@ public class PersonMapper {
                 userDto.setId(student.getUser().getId());
                 userDto.setUsername(student.getUser().getUsername());
                 userDto.setEmail(student.getUser().getEmail());
+                userDto.setRole(person.getUser().getRole().getName());
                 userDto.setPermissions(
-                        person.getUser().getRoles().stream()
-                                .flatMap(role -> role.getPermissions().stream())
-                                .map(permission -> permission.getName())
+                        person.getUser().getRole().getPermissions().stream()
+                                .map(Permission::getName)
                                 .collect(Collectors.toSet())
                 );
                 dto.setUser(userDto);
@@ -57,10 +59,10 @@ public class PersonMapper {
                 userDto.setId(person.getUser().getId());
                 userDto.setUsername(person.getUser().getUsername());
                 userDto.setEmail(person.getUser().getEmail());
+                userDto.setRole(person.getUser().getRole().getName());
                 userDto.setPermissions(
-                        person.getUser().getRoles().stream()
-                                .flatMap(role -> role.getPermissions().stream())
-                                .map(permission -> permission.getName())
+                        person.getUser().getRole().getPermissions().stream()
+                                .map(Permission::getName)
                                 .collect(Collectors.toSet())
                 );
                 dto.setUser(userDto);

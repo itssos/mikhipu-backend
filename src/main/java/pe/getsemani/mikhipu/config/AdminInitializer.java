@@ -13,6 +13,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import pe.getsemani.mikhipu.person.entity.Admin;
 import pe.getsemani.mikhipu.person.entity.Student;
 import pe.getsemani.mikhipu.person.enums.Gender;
 import pe.getsemani.mikhipu.person.enums.Section;
@@ -149,26 +150,22 @@ public class AdminInitializer implements ApplicationRunner {
                     .email(email)
                     .password(passwordEncoder.encode(rawPwd))
                     .active(true)
-                    .roles(Set.of(adminRole))
+                    .role(adminRole)
                     .build();
             userRepo.save(adminUser);
             log.info("✔ Usuario administrador creado: {}", adminUsername);
 
-            // Asignar también una Person ligada a ese User
-            Student person = new Student();
-            person.setFirstName("Sair");
-            person.setLastName("Marquez Hidalgo");
-            person.setDni("12345678");
-            person.setBirthDate(LocalDate.of(2003, 7, 22));
-            person.setGender(Gender.MASCULINO);
-            person.setAddress("Calle Aleatoria 123");
-            person.setPhone("987654321");
-            person.setGrade(6);
-            person.setSection(Section.A);
-            person.setSchoolLevel(SchoolLevel.PRIMARIA);
-            person.setUser(adminUser);
-            personRepo.save(person);
-            log.info("✔ Persona creada para admin: {} {}", person.getFirstName(), person.getLastName());
+            Admin admin = new Admin();
+            admin.setFirstName("Sair");
+            admin.setLastName("Marquez Hidalgo");
+            admin.setDni("12345678");
+            admin.setBirthDate(LocalDate.of(2003, 7, 22));
+            admin.setGender(Gender.MASCULINO);
+            admin.setAddress("Calle Aleatoria 123");
+            admin.setPhone("987654321");
+            admin.setUser(adminUser);
+            personRepo.save(admin);
+            log.info("✔ Persona creada para admin: {} {}", admin.getFirstName(), admin.getLastName());
         }
     }
 }

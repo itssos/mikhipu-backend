@@ -79,12 +79,10 @@ public class PersonService {
                 newUser.setEmail(userDto.getEmail());
                 newUser.setPassword(passwordEncoder.encode(userDto.getPassword() != null ? userDto.getPassword() : dto.getDni()));
                 // Si se envían roles, asignarlos convirtiendo de String a Role
-                if (userDto.getRoles() != null && !userDto.getRoles().isEmpty()) {
-                    Set<Role> roles = userDto.getRoles().stream()
-                            .map(roleStr -> roleRepository.findByName(roleStr)
-                                    .orElseThrow(() -> new ResourceNotFoundException("No se encontro el rol:  " + roleStr)))
-                            .collect(Collectors.toSet());
-                    newUser.setRoles(roles);
+                if (userDto.getRole() != null) {
+                    Role role = roleRepository.findByName(userDto.getRole())
+                            .orElseThrow(() -> new ResourceNotFoundException("No se encontró el rol: " + userDto.getRole()));
+                    newUser.setRole(role);
                 }
                 student.setUser(newUser);
             } else {
@@ -135,12 +133,10 @@ public class PersonService {
                     if (userDto.getPassword() != null) {
                         userEntity.setPassword(passwordEncoder.encode(userDto.getPassword()));
                     }
-                    if (userDto.getRoles() != null && !userDto.getRoles().isEmpty()) {
-                        Set<Role> roles = userDto.getRoles().stream()
-                                .map(roleStr -> roleRepository.findByName(roleStr)
-                                        .orElseThrow(() -> new ResourceNotFoundException("No se encontro el rol: " + roleStr)))
-                                .collect(Collectors.toSet());
-                        userEntity.setRoles(roles);
+                    if (userDto.getRole() != null) {
+                        Role role = roleRepository.findByName(userDto.getRole())
+                                .orElseThrow(() -> new ResourceNotFoundException("No se encontró el rol: " + userDto.getRole()));
+                        userEntity.setRole(role);
                     }
                 } else {
                     // Si no existe el User, crearlo
@@ -148,12 +144,10 @@ public class PersonService {
                     newUser.setUsername(userDto.getUsername() != null ? userDto.getUsername() : dto.getDni());
                     newUser.setEmail(userDto.getEmail());
                     newUser.setPassword(passwordEncoder.encode(userDto.getPassword() != null ? userDto.getPassword() : dto.getDni()));
-                    if (userDto.getRoles() != null && !userDto.getRoles().isEmpty()) {
-                        Set<Role> roles = userDto.getRoles().stream()
-                                .map(roleStr -> roleRepository.findByName(roleStr)
-                                        .orElseThrow(() -> new ResourceNotFoundException("No se encontro el rol: " + roleStr)))
-                                .collect(Collectors.toSet());
-                        newUser.setRoles(roles);
+                    if (userDto.getRole() != null) {
+                        Role role = roleRepository.findByName(userDto.getRole())
+                                .orElseThrow(() -> new ResourceNotFoundException("No se encontró el rol: " + userDto.getRole()));
+                        newUser.setRole(role);
                     }
                     student.setUser(newUser);
                 }

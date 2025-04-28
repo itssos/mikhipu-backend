@@ -1,7 +1,6 @@
 package pe.getsemani.mikhipu.auth.service;
 
 import java.util.Optional;
-import java.util.stream.Collectors;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -15,7 +14,6 @@ import pe.getsemani.mikhipu.person.mapper.PersonMapper;
 import pe.getsemani.mikhipu.person.repository.PersonRepository;
 import pe.getsemani.mikhipu.role.repository.RoleRepository;
 import pe.getsemani.mikhipu.security.JwtTokenProvider;
-import pe.getsemani.mikhipu.user.dto.UserDTO;
 import pe.getsemani.mikhipu.user.entity.User;
 import pe.getsemani.mikhipu.user.repository.UserRepository;
 
@@ -52,19 +50,6 @@ public class AuthService {
         User userEntity = userRepository.findByUsername(request.getUsername())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
 
-        // Mapear User a UserDTO y extraer sus roles
-//        UserDTO userDTO = new UserDTO();
-//        userDTO.setId(userEntity.getId());
-//        userDTO.setUsername(userEntity.getUsername());
-//        userDTO.setEmail(userEntity.getEmail());
-//        userDTO.setPermissions(
-//                userEntity.getRoles().stream()
-//                        .flatMap(role -> role.getPermissions().stream())
-//                        .map(permission -> permission.getName())
-//                        .collect(Collectors.toSet())
-//        );
-
-        // Intentar obtener la entidad Person (puede ser de cualquier subclase), o null si no existe.
         Optional<Person> personOptional = personRepository.findByUserUsername(request.getUsername());
         PersonDTO personDTO = personOptional.map(PersonMapper::mapPersonToDTO).orElse(null);
 
