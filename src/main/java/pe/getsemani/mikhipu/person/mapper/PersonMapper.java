@@ -1,73 +1,40 @@
 package pe.getsemani.mikhipu.person.mapper;
 
-import java.util.stream.Collectors;
-import pe.getsemani.mikhipu.person.dto.PersonDTO;
-import pe.getsemani.mikhipu.person.dto.StudentDTO;
+import pe.getsemani.mikhipu.person.dto.create.PersonCreateDTO;
+import pe.getsemani.mikhipu.person.dto.response.PersonResponseDTO;
 import pe.getsemani.mikhipu.person.entity.Person;
-import pe.getsemani.mikhipu.person.entity.Student;
-import pe.getsemani.mikhipu.role.entity.Permission;
-import pe.getsemani.mikhipu.role.entity.Role;
-import pe.getsemani.mikhipu.user.dto.UserDTO;
+import pe.getsemani.mikhipu.user.mapper.UserMapper;
 
 public class PersonMapper {
 
-    public static PersonDTO mapPersonToDTO(Person person) {
-        if (person instanceof Student) {
-            Student student = (Student) person;
-            StudentDTO dto = new StudentDTO();
-            // Mapear campos comunes de Person
-            dto.setId(student.getId());
-            dto.setFirstName(student.getFirstName());
-            dto.setLastName(student.getLastName());
-            dto.setDni(student.getDni());
-            dto.setBirthDate(student.getBirthDate());
-            dto.setGender(String.valueOf(student.getGender()));
-            dto.setAddress(student.getAddress());
-            dto.setPhone(student.getPhone());
-            // Mapear campos específicos de Student
-            dto.setGrade(student.getGrade());
-            dto.setSection(student.getSection().toString());
-            dto.setSchoolLevel(student.getSchoolLevel().toString());
-            // Mapear el User asociado, si existe
-            if (student.getUser() != null) {
-                UserDTO userDto = new UserDTO();
-                userDto.setId(student.getUser().getId());
-                userDto.setUsername(student.getUser().getUsername());
-                userDto.setEmail(student.getUser().getEmail());
-                userDto.setRole(person.getUser().getRole().getName());
-                userDto.setPermissions(
-                        person.getUser().getRole().getPermissions().stream()
-                                .map(Permission::getName)
-                                .collect(Collectors.toSet())
-                );
-                dto.setUser(userDto);
-            }
-            return dto;
-        } else {
-            // Mapeo para otras subclases de Person (solamente los campos comunes)
-            PersonDTO dto = new PersonDTO();
-            dto.setId(person.getId());
-            dto.setFirstName(person.getFirstName());
-            dto.setLastName(person.getLastName());
-            dto.setDni(person.getDni());
-            dto.setBirthDate(person.getBirthDate());
-            dto.setGender(String.valueOf(person.getGender()));
-            dto.setAddress(person.getAddress());
-            dto.setPhone(person.getPhone());
-            if (person.getUser() != null) {
-                UserDTO userDto = new UserDTO();
-                userDto.setId(person.getUser().getId());
-                userDto.setUsername(person.getUser().getUsername());
-                userDto.setEmail(person.getUser().getEmail());
-                userDto.setRole(person.getUser().getRole().getName());
-                userDto.setPermissions(
-                        person.getUser().getRole().getPermissions().stream()
-                                .map(Permission::getName)
-                                .collect(Collectors.toSet())
-                );
-                dto.setUser(userDto);
-            }
-            return dto;
-        }
+    public static PersonResponseDTO toDto(Person person) {
+        if (person == null) return null;
+
+        PersonResponseDTO dto = new PersonResponseDTO();
+        dto.setId(person.getId());
+        dto.setFirstName(person.getFirstName());
+        dto.setLastName(person.getLastName());
+        dto.setDni(person.getDni());
+        dto.setBirthDate(person.getBirthDate());
+        dto.setGender(person.getGender());
+        dto.setAddress(person.getAddress());
+        dto.setPhone(person.getPhone());
+        dto.setUser(UserMapper.toDto(person.getUser()));
+        return dto;
+    }
+
+    public static Person fromCreateDto(PersonCreateDTO dto) {
+        if (dto == null) return null;
+
+        Person person = new Person();
+        person.setFirstName(dto.getFirstName());
+        person.setLastName(dto.getLastName());
+        person.setDni(dto.getDni());
+        person.setBirthDate(dto.getBirthDate());
+        person.setGender(dto.getGender());
+        person.setAddress(dto.getAddress());
+        person.setPhone(dto.getPhone());
+        person.setUser(UserMapper.fromCreateDto(dto.getUser()));
+        return person;
     }
 }
