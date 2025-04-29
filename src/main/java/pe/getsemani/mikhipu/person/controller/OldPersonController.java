@@ -14,14 +14,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import pe.getsemani.mikhipu.person.dto.PersonCreateDTO;
 import pe.getsemani.mikhipu.person.dto.PersonDTO;
-import pe.getsemani.mikhipu.person.service.PersonService;
+import pe.getsemani.mikhipu.person.service.OldPersonService;
 
 @RestController
 @RequestMapping("/api/persons")
-public class PersonController {
+public class OldPersonController {
 
-    private final PersonService personService;
-    public PersonController(PersonService personService) {
+    private final OldPersonService personService;
+    public OldPersonController(OldPersonService personService) {
         this.personService = personService;
     }
 

@@ -9,19 +9,19 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import pe.getsemani.mikhipu.person.dto.UploadResponse;
 import pe.getsemani.mikhipu.person.entity.Student;
-import pe.getsemani.mikhipu.person.service.StudentService;
+import pe.getsemani.mikhipu.person.service.OldStudentService;
 
 import java.util.List;
 
 @PreAuthorize("hasRole('ADMINISTRADOR')")
 @RestController
 @RequestMapping("/api/students")
-public class StudentController {
+public class OldStudentController {
 
-    private final StudentService studentService;
+    private final OldStudentService studentService;
 
     @Autowired
-    public StudentController(StudentService studentService){
+    public OldStudentController(OldStudentService studentService){
         this.studentService = studentService;
     }
 

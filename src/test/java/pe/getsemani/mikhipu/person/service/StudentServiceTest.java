@@ -14,16 +14,12 @@ import pe.getsemani.mikhipu.person.enums.SchoolLevel;
 import pe.getsemani.mikhipu.person.enums.Section;
 import pe.getsemani.mikhipu.person.repository.StudentRepository;
 import pe.getsemani.mikhipu.role.entity.Role;
-import pe.getsemani.mikhipu.role.enums.RoleType;
 import pe.getsemani.mikhipu.role.repository.RoleRepository;
 import pe.getsemani.mikhipu.user.repository.UserRepository;
-import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
 import java.time.LocalDate;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Optional;
-import java.util.Set;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -50,7 +46,7 @@ class StudentServiceTest {
     private PasswordEncoder passwordEncoder;
 
     @InjectMocks
-    private StudentService studentService;
+    private OldStudentService studentService;
 
     // Método auxiliar para crear un estudiante dummy
     private Student createDummyStudent() {

@@ -16,7 +16,7 @@ import pe.getsemani.mikhipu.person.dto.UploadResponse;
 import pe.getsemani.mikhipu.person.entity.Student;
 import pe.getsemani.mikhipu.person.enums.SchoolLevel;
 import pe.getsemani.mikhipu.person.enums.Section;
-import pe.getsemani.mikhipu.person.service.StudentService;
+import pe.getsemani.mikhipu.person.service.OldStudentService;
 
 import java.time.LocalDate;
 import java.util.Arrays;
@@ -35,13 +35,13 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@WebMvcTest(StudentController.class)
+@WebMvcTest(OldStudentController.class)
 @WithMockUser(roles = "ADMINISTRADOR")
 @DisplayName("Pruebas del controlador de estudiantes")
 class StudentControllerTest {
 
     @MockitoBean
-    private StudentService studentService;
+    private OldStudentService studentService;
 
     private final ObjectMapper objectMapper = new ObjectMapper()
             .registerModule(new JavaTimeModule())
