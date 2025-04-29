@@ -25,6 +25,10 @@ public class PersonService {
         return PersonMapper.toDto(savedPerson);
     }
 
+    public Person saveRaw(Person person) {
+        return personRepository.save(person);
+    }
+
     public PersonResponseDTO getPersonById(Long id) {
         Person person = findPersonById(id);
         return PersonMapper.toDto(person);

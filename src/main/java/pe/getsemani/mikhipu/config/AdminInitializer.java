@@ -14,10 +14,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import pe.getsemani.mikhipu.person.entity.Admin;
-import pe.getsemani.mikhipu.person.entity.Student;
+import pe.getsemani.mikhipu.person.entity.Person;
 import pe.getsemani.mikhipu.person.enums.Gender;
-import pe.getsemani.mikhipu.person.enums.Section;
-import pe.getsemani.mikhipu.person.enums.SchoolLevel;
+import pe.getsemani.mikhipu.person.repository.AdminRepository;
 import pe.getsemani.mikhipu.person.repository.PersonRepository;
 import pe.getsemani.mikhipu.role.entity.Permission;
 import pe.getsemani.mikhipu.role.entity.Role;
@@ -36,21 +35,23 @@ public class AdminInitializer implements ApplicationRunner {
     private final RoleRepository    roleRepo;
     private final PermissionRepository permRepo;
     private final UserRepository    userRepo;
-    private final PersonRepository  personRepo;
+    private final AdminRepository adminRepository;
     private final PasswordEncoder   passwordEncoder;
+    private final PersonRepository personRepository;
 
     public AdminInitializer(Environment env,
                             RoleRepository roleRepo,
                             PermissionRepository permRepo,
                             UserRepository userRepo,
-                            PersonRepository personRepo,
-                            PasswordEncoder passwordEncoder) {
+                            AdminRepository adminRepository,
+                            PasswordEncoder passwordEncoder, PersonRepository personRepository) {
         this.env             = env;
         this.roleRepo        = roleRepo;
         this.permRepo        = permRepo;
         this.userRepo        = userRepo;
-        this.personRepo      = personRepo;
+        this.adminRepository      = adminRepository;
         this.passwordEncoder = passwordEncoder;
+        this.personRepository = personRepository;
     }
 
     @Override
@@ -155,17 +156,24 @@ public class AdminInitializer implements ApplicationRunner {
             userRepo.save(adminUser);
             log.info("✔ Usuario administrador creado: {}", adminUsername);
 
+            // Crear y guardar primero la persona
+            Person person = new Person();
+            person.setFirstName("Sair");
+            person.setLastName("Marquez Hidalgo");
+            person.setDni("12345678");
+            person.setBirthDate(LocalDate.of(2003, 7, 22));
+            person.setGender(Gender.MASCULINO);
+            person.setAddress("Calle Aleatoria 123");
+            person.setPhone("987654321");
+            person.setUser(adminUser);
+
+            Person savedPerson = personRepository.save(person);
+
+            // Asociar la persona al admin y guardar
             Admin admin = new Admin();
-            admin.setFirstName("Sair");
-            admin.setLastName("Marquez Hidalgo");
-            admin.setDni("12345678");
-            admin.setBirthDate(LocalDate.of(2003, 7, 22));
-            admin.setGender(Gender.MASCULINO);
-            admin.setAddress("Calle Aleatoria 123");
-            admin.setPhone("987654321");
-            admin.setUser(adminUser);
-            personRepo.save(admin);
-            log.info("✔ Persona creada para admin: {} {}", admin.getFirstName(), admin.getLastName());
+            admin.setPerson(savedPerson);
+            adminRepository.save(admin);
+            log.info("✔ Persona creada para admin: {} {}", savedPerson.getFirstName(), savedPerson.getLastName());
         }
     }
 }

@@ -16,44 +16,44 @@ import pe.getsemani.mikhipu.person.dto.PersonCreateDTO;
 import pe.getsemani.mikhipu.person.dto.PersonDTO;
 import pe.getsemani.mikhipu.person.service.OldPersonService;
 
-@RestController
-@RequestMapping("/api/persons")
+//@RestController
+//@RequestMapping("/api/persons")
 public class OldPersonController {
-
-    private final OldPersonService personService;
-    public OldPersonController(OldPersonService personService) {
-        this.personService = personService;
-    }
-
-    @GetMapping
-    @PreAuthorize("hasAuthority('GET_PERSONS')")
-    public ResponseEntity<List<PersonDTO>> getAllPersons() {
-        return ResponseEntity.ok(personService.getAllPersons());
-    }
-
-    @GetMapping("/{id}")
-    @PreAuthorize("hasAuthority('GET_PERSON')")
-    public ResponseEntity<PersonDTO> getPersonById(@PathVariable Long id) {
-        return ResponseEntity.ok(personService.getPersonById(id));
-    }
-
-    @PostMapping
-    @PreAuthorize("hasAuthority('CREATE_PERSON')")
-    public ResponseEntity<PersonDTO> createPerson(@RequestBody PersonCreateDTO dto) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(personService.createPerson(dto));
-    }
-
-    @PutMapping("/{id}")
-    @PreAuthorize("hasAuthority('UPDATE_PERSON')")
-    public ResponseEntity<PersonDTO> updatePerson(@PathVariable Long id,
-                                                  @RequestBody PersonCreateDTO dto) {
-        return ResponseEntity.ok(personService.updatePerson(id, dto));
-    }
-
-    @DeleteMapping("/{id}")
-    @PreAuthorize("hasAuthority('DELETE_PERSON')")
-    public ResponseEntity<Void> deletePerson(@PathVariable Long id) {
-        personService.deletePerson(id);
-        return ResponseEntity.noContent().build();
-    }
+//
+//    private final OldPersonService personService;
+//    public OldPersonController(OldPersonService personService) {
+//        this.personService = personService;
+//    }
+//
+//    @GetMapping
+//    @PreAuthorize("hasAuthority('GET_PERSONS')")
+//    public ResponseEntity<List<PersonDTO>> getAllPersons() {
+//        return ResponseEntity.ok(personService.getAllPersons());
+//    }
+//
+//    @GetMapping("/{id}")
+//    @PreAuthorize("hasAuthority('GET_PERSON')")
+//    public ResponseEntity<PersonDTO> getPersonById(@PathVariable Long id) {
+//        return ResponseEntity.ok(personService.getPersonById(id));
+//    }
+//
+//    @PostMapping
+//    @PreAuthorize("hasAuthority('CREATE_PERSON')")
+//    public ResponseEntity<PersonDTO> createPerson(@RequestBody PersonCreateDTO dto) {
+//        return ResponseEntity.status(HttpStatus.CREATED).body(personService.createPerson(dto));
+//    }
+//
+//    @PutMapping("/{id}")
+//    @PreAuthorize("hasAuthority('UPDATE_PERSON')")
+//    public ResponseEntity<PersonDTO> updatePerson(@PathVariable Long id,
+//                                                  @RequestBody PersonCreateDTO dto) {
+//        return ResponseEntity.ok(personService.updatePerson(id, dto));
+//    }
+//
+//    @DeleteMapping("/{id}")
+//    @PreAuthorize("hasAuthority('DELETE_PERSON')")
+//    public ResponseEntity<Void> deletePerson(@PathVariable Long id) {
+//        personService.deletePerson(id);
+//        return ResponseEntity.noContent().build();
+//    }
 }

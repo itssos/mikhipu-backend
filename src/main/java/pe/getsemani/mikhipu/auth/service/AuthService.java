@@ -9,6 +9,7 @@ import org.springframework.web.server.ResponseStatusException;
 import pe.getsemani.mikhipu.auth.dto.JwtAuthResponse;
 import pe.getsemani.mikhipu.auth.dto.LoginRequest;
 import pe.getsemani.mikhipu.person.dto.PersonDTO;
+import pe.getsemani.mikhipu.person.dto.response.PersonResponseDTO;
 import pe.getsemani.mikhipu.person.entity.Person;
 import pe.getsemani.mikhipu.person.mapper.PersonMapper;
 import pe.getsemani.mikhipu.person.repository.PersonRepository;
@@ -51,8 +52,8 @@ public class AuthService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
 
         Optional<Person> personOptional = personRepository.findByUserUsername(request.getUsername());
-        PersonDTO personDTO = personOptional.map(PersonMapper::mapPersonToDTO).orElse(null);
+        PersonResponseDTO personResponseDTO = personOptional.map(PersonMapper::toDto).orElse(null);
 
-        return new JwtAuthResponse(jwt, TOKEN_TYPE, personDTO);
+        return new JwtAuthResponse(jwt, TOKEN_TYPE, personResponseDTO);
     }
 }
