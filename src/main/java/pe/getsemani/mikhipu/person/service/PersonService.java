@@ -18,11 +18,12 @@ import java.util.stream.Collectors;
 public class PersonService {
 
     private final PersonRepository personRepository;
+    private final PersonMapper personMapper;
 
     public PersonResponseDTO createPerson(PersonCreateDTO dto) {
-        Person person = PersonMapper.fromCreateDto(dto);
+        Person person = personMapper.fromCreateDto(dto);
         Person savedPerson = personRepository.save(person);
-        return PersonMapper.toDto(savedPerson);
+        return personMapper.toDto(savedPerson);
     }
 
     public Person saveRaw(Person person) {
@@ -31,13 +32,13 @@ public class PersonService {
 
     public PersonResponseDTO getPersonById(Long id) {
         Person person = findPersonById(id);
-        return PersonMapper.toDto(person);
+        return personMapper.toDto(person);
     }
 
     public List<PersonResponseDTO> getAllPersons() {
         return personRepository.findAll()
                 .stream()
-                .map(PersonMapper::toDto)
+                .map(personMapper::toDto)
                 .collect(Collectors.toList());
     }
 

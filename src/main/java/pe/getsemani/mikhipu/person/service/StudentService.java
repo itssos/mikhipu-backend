@@ -19,15 +19,14 @@ import pe.getsemani.mikhipu.person.mapper.PersonMapper;
 import pe.getsemani.mikhipu.person.mapper.StudentMapper;
 import pe.getsemani.mikhipu.person.repository.RepresentativeRepository;
 import pe.getsemani.mikhipu.person.repository.StudentRepository;
-
+import pe.getsemani.mikhipu.role.repository.RoleRepository;
+import pe.getsemani.mikhipu.user.repository.UserRepository;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.DateUtil;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import pe.getsemani.mikhipu.role.repository.RoleRepository;
-import pe.getsemani.mikhipu.user.repository.UserRepository;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -48,32 +47,73 @@ public class StudentService {
     private final RoleRepository roleRepository;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final PersonMapper personMapper;
+    private final StudentMapper studentMapper;
 
     public StudentResponseDTO createStudent(StudentCreateDTO dto) {
-        Student student = StudentMapper.fromCreateDto(dto);
+        // Mapear DTO a entidad
+        Student student = studentMapper.fromCreateDto(dto);
 
-        Person person = PersonMapper.fromCreateDto(dto.getPerson());
+        // Mapear y guardar Person
+        Person person = personMapper.fromCreateDto(dto.getPerson());
         Person savedPerson = personService.saveRaw(person);
         student.setPerson(savedPerson);
 
+        // Asignar representantes si hay IDs
         if (dto.getRepresentativeIds() != null && !dto.getRepresentativeIds().isEmpty()) {
-            Set<Representative> representatives = new HashSet<>(representativeRepository.findAllById(dto.getRepresentativeIds()));
-            student.setRepresentatives(representatives);
+            Set<Representative> reps = new HashSet<>(
+                    representativeRepository.findAllById(dto.getRepresentativeIds())
+            );
+            student.setRepresentatives(reps);
         }
 
         Student savedStudent = studentRepository.save(student);
-        return StudentMapper.toDto(savedStudent);
+        return studentMapper.toDto(savedStudent);
+    }
+
+    @Transactional
+    public StudentResponseDTO updateStudent(Long id, StudentCreateDTO dto) {
+        Student student = findStudentById(id);
+
+        // Actualizar datos de Person
+        Person person = student.getPerson();
+        var pDto = dto.getPerson();
+        person.setFirstName(pDto.getFirstName());
+        person.setLastName(pDto.getLastName());
+        person.setDni(pDto.getDni());
+        person.setBirthDate(pDto.getBirthDate());
+        person.setGender(pDto.getGender());
+        person.setAddress(pDto.getAddress());
+        person.setPhone(pDto.getPhone());
+        personService.saveRaw(person);
+
+        // Actualizar campos específicos de Student
+        student.setGrade(dto.getGrade());
+        student.setSection(dto.getSection());
+        student.setSchoolLevel(dto.getSchoolLevel());
+
+        // Actualizar representantes
+        student.getRepresentatives().clear();
+        if (dto.getRepresentativeIds() != null && !dto.getRepresentativeIds().isEmpty()) {
+            Set<Representative> reps = new HashSet<>(
+                    representativeRepository.findAllById(dto.getRepresentativeIds())
+            );
+            student.setRepresentatives(reps);
+        }
+
+        Student updated = studentRepository.save(student);
+        return studentMapper.toDto(updated);
     }
 
     public StudentResponseDTO getStudentById(Long id) {
         Student student = findStudentById(id);
-        return StudentMapper.toDto(student);
+        return studentMapper.toDto(student);
     }
 
     public List<StudentResponseDTO> getAllStudents() {
         return studentRepository.findAll()
                 .stream()
-                .map(StudentMapper::toDto)
+                .map(studentMapper::toDto)
                 .collect(Collectors.toList());
     }
 

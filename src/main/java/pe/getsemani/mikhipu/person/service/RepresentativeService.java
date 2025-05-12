@@ -3,6 +3,7 @@ package pe.getsemani.mikhipu.person.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import pe.getsemani.mikhipu.exception.ResourceNotFoundException;
 import pe.getsemani.mikhipu.person.dto.create.RepresentativeCreateDTO;
 import pe.getsemani.mikhipu.person.dto.response.RepresentativeResponseDTO;
 import pe.getsemani.mikhipu.person.entity.Person;
@@ -24,42 +25,44 @@ import java.util.stream.Collectors;
 public class RepresentativeService {
 
     private final RepresentativeRepository representativeRepository;
-    private final PersonService personService;
     private final StudentRepository studentRepository;
+    private final PersonMapper personMapper;
+    private final RepresentativeMapper representativeMapper;
 
     public RepresentativeResponseDTO createRepresentative(RepresentativeCreateDTO dto) {
-        Representative representative = RepresentativeMapper.fromCreateDto(dto);
 
-        Person person = PersonMapper.fromCreateDto(dto.getPerson());
+        Representative representative = representativeMapper.fromCreateDto(dto);
+
+        Person person = personMapper.fromCreateDto(dto.getPerson());
         representative.setPerson(person);
 
         if (dto.getStudentIds() != null && !dto.getStudentIds().isEmpty()) {
-            Set<Student> students = new HashSet<>(studentRepository.findAllById(dto.getStudentIds()));
+            Set<Student> students = new HashSet<>(studentRepository
+                    .findAllById(dto.getStudentIds()));
             representative.setStudents(students);
         }
 
-        Representative savedRepresentative = representativeRepository.save(representative);
-        return RepresentativeMapper.toDto(savedRepresentative);
+        Representative saved = representativeRepository.save(representative);
+        return representativeMapper.toDto(saved);
     }
 
     public RepresentativeResponseDTO getRepresentativeById(Long id) {
-        Representative representative = findRepresentativeById(id);
-        return RepresentativeMapper.toDto(representative);
+        Representative rep = representativeRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Representative not found with id: " + id));
+        return representativeMapper.toDto(rep);
     }
 
     public List<RepresentativeResponseDTO> getAllRepresentatives() {
         return representativeRepository.findAll()
                 .stream()
-                .map(RepresentativeMapper::toDto)
+                .map(representativeMapper::toDto)
                 .collect(Collectors.toList());
     }
 
     public void deleteRepresentative(Long id) {
+        if (!representativeRepository.existsById(id)) {
+            throw new ResourceNotFoundException("Representative not found with id: " + id);
+        }
         representativeRepository.deleteById(id);
-    }
-
-    protected Representative findRepresentativeById(Long id) {
-        return representativeRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Representative not found with id: " + id));
     }
 }

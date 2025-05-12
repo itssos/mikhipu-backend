@@ -1,5 +1,7 @@
 package pe.getsemani.mikhipu.person.mapper;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 import pe.getsemani.mikhipu.person.dto.basic.RepresentativeBasicDTO;
 import pe.getsemani.mikhipu.person.dto.create.StudentCreateDTO;
 import pe.getsemani.mikhipu.person.dto.response.StudentResponseDTO;
@@ -9,14 +11,22 @@ import pe.getsemani.mikhipu.person.entity.Student;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+@Component
 public class StudentMapper {
 
-    public static StudentResponseDTO toDto(Student student) {
+    private final PersonMapper personMapper;
+
+    @Autowired
+    public StudentMapper(PersonMapper personMapper) {
+        this.personMapper = personMapper;
+    }
+
+    public StudentResponseDTO toDto(Student student) {
         if (student == null) return null;
 
         StudentResponseDTO dto = new StudentResponseDTO();
         dto.setId(student.getId());
-        dto.setPerson(PersonMapper.toDto(student.getPerson()));
+        dto.setPerson(personMapper.toDto(student.getPerson()));
         dto.setGrade(student.getGrade());
         dto.setSection(student.getSection());
         dto.setSchoolLevel(student.getSchoolLevel());
@@ -24,7 +34,7 @@ public class StudentMapper {
         if (student.getRepresentatives() != null) {
             Set<RepresentativeBasicDTO> reps = student.getRepresentatives()
                     .stream()
-                    .map(StudentMapper::toBasicRepresentative)
+                    .map(this::toBasicRepresentative)
                     .collect(Collectors.toSet());
             dto.setRepresentatives(reps);
         }
@@ -32,22 +42,24 @@ public class StudentMapper {
         return dto;
     }
 
-    public static RepresentativeBasicDTO toBasicRepresentative(Representative representative) {
+    public RepresentativeBasicDTO toBasicRepresentative(Representative representative) {
+        if (representative == null) return null;
         RepresentativeBasicDTO dto = new RepresentativeBasicDTO();
         dto.setId(representative.getId());
-        dto.setFullName(representative.getPerson().getFirstName() + " " + representative.getPerson().getLastName());
+        dto.setFullName(
+                representative.getPerson().getFirstName() + " " + representative.getPerson().getLastName()
+        );
         return dto;
     }
 
-    public static Student fromCreateDto(StudentCreateDTO dto) {
+    public Student fromCreateDto(StudentCreateDTO dto) {
         if (dto == null) return null;
 
         Student student = new Student();
-        student.setPerson(PersonMapper.fromCreateDto(dto.getPerson()));
+        student.setPerson(personMapper.fromCreateDto(dto.getPerson()));
         student.setGrade(dto.getGrade());
         student.setSection(dto.getSection());
         student.setSchoolLevel(dto.getSchoolLevel());
-        // El set de representatives se maneja aparte, porque necesitas cargar las entidades Representative antes
         return student;
     }
 }

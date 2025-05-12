@@ -1,13 +1,26 @@
 package pe.getsemani.mikhipu.person.mapper;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 import pe.getsemani.mikhipu.person.dto.create.PersonCreateDTO;
 import pe.getsemani.mikhipu.person.dto.response.PersonResponseDTO;
 import pe.getsemani.mikhipu.person.entity.Person;
+import pe.getsemani.mikhipu.user.dto.UserCreateDTO;
+import pe.getsemani.mikhipu.user.dto.UserResponseDTO;
+import pe.getsemani.mikhipu.user.entity.User;
 import pe.getsemani.mikhipu.user.mapper.UserMapper;
 
+@Component
 public class PersonMapper {
 
-    public static PersonResponseDTO toDto(Person person) {
+    private final UserMapper userMapper;
+
+    @Autowired
+    public PersonMapper(UserMapper userMapper) {
+        this.userMapper = userMapper;
+    }
+
+    public PersonResponseDTO toDto(Person person) {
         if (person == null) return null;
 
         PersonResponseDTO dto = new PersonResponseDTO();
@@ -19,11 +32,11 @@ public class PersonMapper {
         dto.setGender(person.getGender());
         dto.setAddress(person.getAddress());
         dto.setPhone(person.getPhone());
-        dto.setUser(UserMapper.toDto(person.getUser()));
+        dto.setUser(userMapper.toDto(person.getUser()));
         return dto;
     }
 
-    public static Person fromCreateDto(PersonCreateDTO dto) {
+    public Person fromCreateDto(PersonCreateDTO dto) {
         if (dto == null) return null;
 
         Person person = new Person();
@@ -34,7 +47,7 @@ public class PersonMapper {
         person.setGender(dto.getGender());
         person.setAddress(dto.getAddress());
         person.setPhone(dto.getPhone());
-        person.setUser(UserMapper.fromCreateDto(dto.getUser()));
+        person.setUser(userMapper.fromCreateDto(dto.getUser()));
         return person;
     }
 }

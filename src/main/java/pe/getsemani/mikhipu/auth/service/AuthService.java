@@ -8,7 +8,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 import pe.getsemani.mikhipu.auth.dto.JwtAuthResponse;
 import pe.getsemani.mikhipu.auth.dto.LoginRequest;
-import pe.getsemani.mikhipu.person.dto.PersonDTO;
 import pe.getsemani.mikhipu.person.dto.response.PersonResponseDTO;
 import pe.getsemani.mikhipu.person.entity.Person;
 import pe.getsemani.mikhipu.person.mapper.PersonMapper;
@@ -28,31 +27,35 @@ public class AuthService {
     private final UserRepository userRepository;
     private final PersonRepository personRepository;
     private final RoleRepository roleRepository;
+    private final PersonMapper personMapper;
 
     public AuthService(AuthenticationManager authenticationManager,
                        JwtTokenProvider tokenProvider,
                        UserRepository userRepository,
                        PersonRepository personRepository,
-                       RoleRepository roleRepository) {
+                       RoleRepository roleRepository, PersonMapper personMapper) {
         this.authenticationManager = authenticationManager;
         this.tokenProvider = tokenProvider;
         this.userRepository = userRepository;
         this.personRepository = personRepository;
         this.roleRepository = roleRepository;
+        this.personMapper = personMapper;
     }
 
     public JwtAuthResponse authenticate(LoginRequest request) {
         UsernamePasswordAuthenticationToken authToken =
                 new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword());
         authenticationManager.authenticate(authToken);
+
         String jwt = tokenProvider.generateToken(authToken);
 
-        // Obtener la entidad User por username
         User userEntity = userRepository.findByUsername(request.getUsername())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
 
         Optional<Person> personOptional = personRepository.findByUserUsername(request.getUsername());
-        PersonResponseDTO personResponseDTO = personOptional.map(PersonMapper::toDto).orElse(null);
+        PersonResponseDTO personResponseDTO = personOptional
+                .map(personMapper::toDto)     // ahora llamamos al método de instancia
+                .orElse(null);
 
         return new JwtAuthResponse(jwt, TOKEN_TYPE, personResponseDTO);
     }

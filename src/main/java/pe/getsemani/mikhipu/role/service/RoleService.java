@@ -13,8 +13,7 @@ public class RoleService {
 
     private final RoleRepository roleRepository;
 
-    @Autowired
-    public RoleService(RoleRepository roleRepository){
+    public RoleService(RoleRepository roleRepository) {
         this.roleRepository = roleRepository;
     }
 
@@ -25,6 +24,11 @@ public class RoleService {
     public Role getRoleById(Integer id) {
         return roleRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Rol no encontrado con id " + id));
+    }
+
+    public Role getRoleByName(String name){
+        return roleRepository.findByName(name)
+                .orElseThrow(() -> new ResourceNotFoundException("Rol no encontrado con nombre: " + name));
     }
 
     public List<Role> getAllRoles() {

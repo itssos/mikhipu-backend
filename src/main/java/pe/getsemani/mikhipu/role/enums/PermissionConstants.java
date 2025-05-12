@@ -14,11 +14,27 @@ public enum PermissionConstants {
     UPDATE_PERSON("UPDATE_PERSON", "Editar persona"),
     DELETE_PERSON("DELETE_PERSON", "Eliminar persona"),
 
+    GET_STUDENTS("GET_STUDENTS", "Ver estudiantes"),
+    GET_STUDENT("GET_STUDENT", "Ver estudiante"),
+    CREATE_STUDENT("CREATE_STUDENT", "Crear estudiante"),
+    UPDATE_STUDENT("UPDATE_STUDENT", "Editar estudiante"),
+    DELETE_STUDENT("DELETE_STUDENT", "Eliminar estudiante"),
+    UPLOAD_STUDENT_LIST("UPLOAD_STUDENT_LIST", "Editar estudiantes"),
+    UPLOAD_STUDENT_EXCEL("UPLOAD_STUDENT_EXCEL", "Subir excel estudiantes"),
+
+    GET_REPRESENTATIVES("GET_REPRESENTATIVES", "Ver apoderados"),
+    GET_REPRESENTATIVE("GET_REPRESENTATIVE", "Ver apoderado"),
+    CREATE_REPRESENTATIVE("CREATE_REPRESENTATIVE", "Crear apoderado"),
+    DELETE_REPRESENTATIVE("DELETE_REPRESENTATIVE", "Eliminar apoderado"),
+
     GET_ROLES("GET_ROLES", "Ver roles"),
     GET_ROLE("GET_ROLE", "Detalle de rol"),
     CREATE_ROLE("CREATE_ROLE", "Crear rol"),
     UPDATE_ROLE("UPDATE_ROLE", "Editar rol"),
     DELETE_ROLE("DELETE_ROLE", "Eliminar rol"),
+
+    GET_PERMISSIONS("GET_PERMISSIONS", "Ver permisos"),
+    GET_PERMISSION("GET_PERMISSION", "Ver permiso"),
 
     ASSIGN_ROLE_PERMISSION("ASSIGN_ROLE_PERMISSION", "Asignar permiso"),
     REMOVE_ROLE_PERMISSION("REMOVE_ROLE_PERMISSION", "Quitar permiso");
