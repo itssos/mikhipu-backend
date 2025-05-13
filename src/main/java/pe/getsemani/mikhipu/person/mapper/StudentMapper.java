@@ -4,10 +4,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import pe.getsemani.mikhipu.person.dto.basic.RepresentativeBasicDTO;
 import pe.getsemani.mikhipu.person.dto.create.StudentCreateDTO;
+import pe.getsemani.mikhipu.person.dto.response.StudentCourseViewDTO;
 import pe.getsemani.mikhipu.person.dto.response.StudentResponseDTO;
 import pe.getsemani.mikhipu.person.entity.Representative;
 import pe.getsemani.mikhipu.person.entity.Student;
 
+import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -31,14 +33,6 @@ public class StudentMapper {
         dto.setSection(student.getSection());
         dto.setSchoolLevel(student.getSchoolLevel());
 
-        if (student.getRepresentatives() != null) {
-            Set<RepresentativeBasicDTO> reps = student.getRepresentatives()
-                    .stream()
-                    .map(this::toBasicRepresentative)
-                    .collect(Collectors.toSet());
-            dto.setRepresentatives(reps);
-        }
-
         return dto;
     }
 
@@ -61,5 +55,20 @@ public class StudentMapper {
         student.setSection(dto.getSection());
         student.setSchoolLevel(dto.getSchoolLevel());
         return student;
+    }
+    public StudentCourseViewDTO toCourseViewDto(Student student) {
+        if (student == null) return null;
+
+        StudentCourseViewDTO dto = new StudentCourseViewDTO();
+        dto.setId(student.getId());
+        dto.setFullName(
+                student.getPerson().getFirstName() + " " + student.getPerson().getLastName()
+        );
+        dto.setDni(student.getPerson().getDni());
+        dto.setGrade(student.getGrade());
+        dto.setSection(student.getSection());
+        dto.setSchoolLevel(student.getSchoolLevel());
+
+        return dto;
     }
 }

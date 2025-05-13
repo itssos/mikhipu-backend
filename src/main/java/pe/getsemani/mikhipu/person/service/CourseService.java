@@ -4,12 +4,20 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import pe.getsemani.mikhipu.exception.ResourceNotFoundException;
+import pe.getsemani.mikhipu.person.dto.CourseTeacherViewDTO;
 import pe.getsemani.mikhipu.person.dto.create.CourseCreateDTO;
 import pe.getsemani.mikhipu.person.dto.response.CourseResponseDTO;
+import pe.getsemani.mikhipu.person.dto.response.StudentCourseViewDTO;
+import pe.getsemani.mikhipu.person.dto.response.StudentResponseDTO;
 import pe.getsemani.mikhipu.person.entity.Course;
 import pe.getsemani.mikhipu.person.entity.Student;
 import pe.getsemani.mikhipu.person.entity.Teacher;
+import pe.getsemani.mikhipu.person.enums.SchoolLevel;
+import pe.getsemani.mikhipu.person.enums.Section;
 import pe.getsemani.mikhipu.person.mapper.CourseMapper;
+import pe.getsemani.mikhipu.person.mapper.StudentMapper;
+import pe.getsemani.mikhipu.person.repository.CourseRelationRepository;
+import pe.getsemani.mikhipu.person.repository.CourseRelationRepositoryImpl;
 import pe.getsemani.mikhipu.person.repository.CourseRepository;
 import pe.getsemani.mikhipu.person.repository.CourseStudentRepository;
 import pe.getsemani.mikhipu.person.repository.StudentRepository;
@@ -30,6 +38,8 @@ public class CourseService {
     private final StudentRepository studentRepository;
     private final CourseMapper courseMapper;
     private final CourseStudentRepository courseStudentRepository;
+    private final StudentMapper studentMapper;
+    private final CourseRelationRepository courseRelationRepository;
 
     public CourseResponseDTO create(CourseCreateDTO dto) {
         Course course = courseMapper.toEntity(dto);
@@ -75,19 +85,19 @@ public class CourseService {
                 .orElseThrow(() -> new IllegalArgumentException("Curso no encontrado"));
 
         Teacher mainTeacher = teacherRepository.findByCode(mainTeacherCode)
-                .orElseThrow(() -> new IllegalArgumentException("Docente principal no encontrado: " + mainTeacherCode));
+                .orElseThrow(() -> new IllegalArgumentException("Docente principal no encontrado"));
 
-        Set<Teacher> auxiliaryTeachers = (auxiliaryTeacherCodes != null && !auxiliaryTeacherCodes.isEmpty())
+        Set<Teacher> auxiliaries = auxiliaryTeacherCodes != null
                 ? new HashSet<>(teacherRepository.findAllByCodeIn(auxiliaryTeacherCodes))
-                : new HashSet<>();
+                : Set.of();
 
-        auxiliaryTeachers.removeIf(t -> t.getCode().equals(mainTeacherCode));
-
-        course.getTeachers().clear();
-        course.getTeachers().addAll(auxiliaryTeachers);
+        auxiliaries.removeIf(t -> t.getCode().equals(mainTeacherCode));
 
         course.setMainTeacher(mainTeacher);
         courseRepository.save(course);
+
+        courseRelationRepository.assignAuxiliaryTeachers(courseId,
+                auxiliaries.stream().map(Teacher::getId).collect(Collectors.toSet()));
     }
 
     @Transactional
@@ -98,26 +108,18 @@ public class CourseService {
         Teacher main = course.getMainTeacher();
         if (main != null && teacherCodes.contains(main.getCode())) {
             course.setMainTeacher(null);
+            courseRepository.save(course);
         }
 
-        courseStudentRepository.removeTeachersFromCourseByCode(courseId, teacherCodes);
-        courseRepository.save(course);
+        courseRelationRepository.removeTeachersByCode(courseId, teacherCodes);
     }
-
 
     @Transactional
     public void assignStudentsToCourse(Long courseId, Set<Long> studentIds) {
-        Course course = courseRepository.findById(courseId)
+        courseRepository.findById(courseId)
                 .orElseThrow(() -> new IllegalArgumentException("Curso no encontrado"));
 
-        Set<Student> students = new HashSet<>(studentRepository.findAllById(studentIds));
-
-        if (course.getStudents() == null) {
-            course.setStudents(new HashSet<>());
-        }
-
-        course.getStudents().addAll(students);
-        courseRepository.save(course);
+        courseRelationRepository.assignStudents(courseId, studentIds);
     }
 
     @Transactional
@@ -125,10 +127,37 @@ public class CourseService {
         courseRepository.findById(courseId)
                 .orElseThrow(() -> new IllegalArgumentException("Curso no encontrado"));
 
-        courseStudentRepository.removeStudentsFromCourse(courseId, studentIds);
+        courseRelationRepository.removeStudents(courseId, studentIds);
+    }
+
+    public List<CourseTeacherViewDTO> getTeachersByCourseId(Long courseId) {
+        return courseRepository.findTeachersByCourseId(courseId).stream()
+                .map(proj -> {
+                    CourseTeacherViewDTO dto = new CourseTeacherViewDTO();
+                    dto.setId(proj.getId());
+                    dto.setFullName(proj.getFullName());
+                    dto.setCode(proj.getCode());
+                    dto.setRole(proj.getRole());
+                    return dto;
+                })
+                .toList();
     }
 
 
+    public List<StudentCourseViewDTO> findStudentsByCourseIdLight(Long courseId) {
+        return courseRepository.findStudentCourseViewByCourseId(courseId).stream()
+                .map(proj -> {
+                    StudentCourseViewDTO dto = new StudentCourseViewDTO();
+                    dto.setId(proj.getId());
+                    dto.setFullName(proj.getFullName());
+                    dto.setDni(proj.getDni());
+                    dto.setGrade(proj.getGrade());
+                    dto.setSection(Section.valueOf(proj.getSection()));
+                    dto.setSchoolLevel(SchoolLevel.valueOf(proj.getSchoolLevel()));
+                    return dto;
+                })
+                .toList();
+    }
 
     private Teacher findTeacherByCode(String code) {
         return (Teacher) teacherRepository.findByCode(code)

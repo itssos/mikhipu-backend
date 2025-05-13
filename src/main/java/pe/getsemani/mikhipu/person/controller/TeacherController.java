@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import pe.getsemani.mikhipu.person.dto.create.TeacherCreateDTO;
+import pe.getsemani.mikhipu.person.dto.response.StudentResponseDTO;
 import pe.getsemani.mikhipu.person.dto.response.TeacherResponseDTO;
 import pe.getsemani.mikhipu.person.service.TeacherService;
 
@@ -53,5 +54,10 @@ public class TeacherController {
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         teacherService.delete(id);
         return ResponseEntity.noContent().build();
+    }
+//    @PreAuthorize("hasAuthority('GET_TEACHER_STUDENTS')")
+    @GetMapping("/{teacherId}/students")
+    public ResponseEntity<List<StudentResponseDTO>> getStudentsByTeacher(@PathVariable Long teacherId) {
+        return ResponseEntity.ok(teacherService.getStudentsTaughtByTeacher(teacherId));
     }
 }

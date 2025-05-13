@@ -13,10 +13,13 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import pe.getsemani.mikhipu.person.dto.AssignTeachersDTO;
+import pe.getsemani.mikhipu.person.dto.CourseTeacherViewDTO;
 import pe.getsemani.mikhipu.person.dto.ManageStudentsDTO;
 import pe.getsemani.mikhipu.person.dto.RemoveTeachersDTO;
 import pe.getsemani.mikhipu.person.dto.create.CourseCreateDTO;
 import pe.getsemani.mikhipu.person.dto.response.CourseResponseDTO;
+import pe.getsemani.mikhipu.person.dto.response.StudentCourseViewDTO;
+import pe.getsemani.mikhipu.person.dto.response.StudentResponseDTO;
 import pe.getsemani.mikhipu.person.service.CourseService;
 
 import java.util.List;
@@ -77,6 +80,18 @@ public class CourseController {
     ) {
         courseService.removeTeachersFromCourse(courseId, dto.getTeacherCodes());
         return ResponseEntity.ok(courseService.findById(courseId));
+    }
+
+    // @PreAuthorize("hasAuthority('GET_COURSE_STUDENTS')")
+    @GetMapping("/{courseId}/students/summary")
+    public ResponseEntity<List<StudentCourseViewDTO>> getStudentsSummaryByCourse(@PathVariable Long courseId) {
+        return ResponseEntity.ok(courseService.findStudentsByCourseIdLight(courseId));
+    }
+
+    // @PreAuthorize("hasAuthority('GET_TEACHERS_OF_COURSE')")
+    @GetMapping("/{courseId}/teachers")
+    public ResponseEntity<List<CourseTeacherViewDTO>> getTeachersOfCourse(@PathVariable Long courseId) {
+        return ResponseEntity.ok(courseService.getTeachersByCourseId(courseId));
     }
 
 

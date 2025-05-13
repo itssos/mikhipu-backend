@@ -6,7 +6,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
 import org.springframework.web.multipart.MultipartFile;
 import pe.getsemani.mikhipu.person.dto.UploadResponse;
+import pe.getsemani.mikhipu.person.dto.basic.RepresentativeBasicDTO;
 import pe.getsemani.mikhipu.person.dto.create.StudentCreateDTO;
+import pe.getsemani.mikhipu.person.dto.response.StudentCourseViewDTO;
 import pe.getsemani.mikhipu.person.dto.response.StudentResponseDTO;
 import pe.getsemani.mikhipu.person.entity.Person;
 import pe.getsemani.mikhipu.person.entity.Representative;
@@ -16,6 +18,7 @@ import pe.getsemani.mikhipu.person.enums.SchoolLevel;
 import pe.getsemani.mikhipu.person.enums.Section;
 import pe.getsemani.mikhipu.person.mapper.PersonMapper;
 import pe.getsemani.mikhipu.person.mapper.StudentMapper;
+import pe.getsemani.mikhipu.person.repository.PersonRepository;
 import pe.getsemani.mikhipu.person.repository.RepresentativeRepository;
 import pe.getsemani.mikhipu.person.repository.StudentRepository;
 import org.apache.poi.ss.usermodel.Cell;
@@ -25,6 +28,8 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import pe.getsemani.mikhipu.person.repository.StudentRepresentativeRepository;
+import pe.getsemani.mikhipu.user.entity.User;
+import pe.getsemani.mikhipu.user.repository.UserRepository;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -45,6 +50,8 @@ public class StudentService {
     private final PersonMapper personMapper;
     private final StudentMapper studentMapper;
     private final StudentRepresentativeRepository studentRepresentativeRepository;
+    private final UserRepository userRepository;
+    private final PersonRepository personRepository;
 
     public StudentResponseDTO createStudent(StudentCreateDTO dto) {
         // Mapear DTO a entidad
@@ -88,14 +95,12 @@ public class StudentService {
         student.setSection(dto.getSection());
         student.setSchoolLevel(dto.getSchoolLevel());
 
-        // Actualizar representantes
-        student.getRepresentatives().clear();
+        // Reemplazar representantes sin modificar la colección activa
+        Set<Representative> newReps = new HashSet<>();
         if (dto.getRepresentativeIds() != null && !dto.getRepresentativeIds().isEmpty()) {
-            Set<Representative> reps = new HashSet<>(
-                    representativeRepository.findAllById(dto.getRepresentativeIds())
-            );
-            student.setRepresentatives(reps);
+            newReps = new HashSet<>(representativeRepository.findAllById(dto.getRepresentativeIds()));
         }
+        student.setRepresentatives(newReps);
 
         Student updated = studentRepository.save(student);
         return studentMapper.toDto(updated);
@@ -106,16 +111,44 @@ public class StudentService {
         return studentMapper.toDto(student);
     }
 
-    public List<StudentResponseDTO> getAllStudents() {
+    public List<StudentCourseViewDTO> getAllStudents() {
         return studentRepository.findAll()
                 .stream()
-                .map(studentMapper::toDto)
+                .map(studentMapper::toCourseViewDto)
                 .collect(Collectors.toList());
     }
 
-    public void deleteStudent(Long id) {
-        studentRepository.deleteById(id);
+    public List<StudentCourseViewDTO> getAllStudentsFiltered(String dni, String name) {
+        return studentRepository.findByOptionalFilters(dni, name)
+                .stream()
+                .map(proj -> {
+                    StudentCourseViewDTO dto = new StudentCourseViewDTO();
+                    dto.setId(proj.getId());
+                    dto.setFullName(proj.getFullName());
+                    dto.setDni(proj.getDni());
+                    dto.setGrade(proj.getGrade());
+                    dto.setSection(Section.valueOf(proj.getSection()));
+                    dto.setSchoolLevel(SchoolLevel.valueOf(proj.getSchoolLevel()));
+                    return dto;
+                })
+                .toList();
     }
+
+    @Transactional
+    public void deleteStudent(Long id) {
+        Student student = studentRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Estudiante no encontrado"));
+
+        Person person = student.getPerson();
+        User user = person.getUser();
+
+        studentRepository.delete(student);
+        if (user != null) {
+            userRepository.delete(user);
+        }
+        personRepository.delete(person);
+    }
+
 
     protected Student findStudentById(Long id) {
         return studentRepository.findById(id)
@@ -231,4 +264,17 @@ public class StudentService {
 
         studentRepresentativeRepository.removeRepresentativesFromStudent(studentId, representativeIds);
     }
+
+    public List<RepresentativeBasicDTO> getRepresentativesByStudentId(Long studentId) {
+        return studentRepository.findRepresentativesByStudentId(studentId).stream()
+                .map(proj -> {
+                    RepresentativeBasicDTO dto = new RepresentativeBasicDTO();
+                    dto.setId(proj.getId());
+                    dto.setFullName(proj.getFullName());
+                    return dto;
+                })
+                .toList();
+    }
+
+
 }

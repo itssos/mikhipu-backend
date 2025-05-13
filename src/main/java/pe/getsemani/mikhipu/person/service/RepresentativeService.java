@@ -35,7 +35,7 @@ public class RepresentativeService {
         Representative representative = representativeMapper.fromCreateDto(dto);
 
         Person person = personMapper.fromCreateDto(dto.getPerson());
-        person = personRepository.save(person); // 🔥 persistir primero
+        person = personRepository.save(person);
         representative.setPerson(person);
 
         if (dto.getStudentIds() != null && !dto.getStudentIds().isEmpty()) {

@@ -1,6 +1,7 @@
 package pe.getsemani.mikhipu.person.entity;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -44,6 +45,7 @@ public class Representative {
     @Column(name = "relationship", length = 30)
     private RelationshipType relationship;
 
+    @JsonIgnore
     @ManyToMany(mappedBy = "representatives")
     private Set<Student> students;
 }

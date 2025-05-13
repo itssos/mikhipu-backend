@@ -11,5 +11,4 @@ public class RepresentativeResponseDTO {
     private Long id;
     private PersonResponseDTO person;
     private RelationshipType relationship;
-    private Set<StudentBasicDTO> students;
 }

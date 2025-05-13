@@ -17,11 +17,14 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import pe.getsemani.mikhipu.person.dto.ManageRepresentativesDTO;
 import pe.getsemani.mikhipu.person.dto.UploadResponse;
+import pe.getsemani.mikhipu.person.dto.basic.RepresentativeBasicDTO;
 import pe.getsemani.mikhipu.person.dto.create.StudentCreateDTO;
+import pe.getsemani.mikhipu.person.dto.response.StudentCourseViewDTO;
 import pe.getsemani.mikhipu.person.dto.response.StudentResponseDTO;
 import pe.getsemani.mikhipu.person.service.StudentService;
 
 import java.util.List;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/api/students")
@@ -32,8 +35,11 @@ public class StudentController {
 
     @GetMapping
     @PreAuthorize("hasAuthority('GET_STUDENTS')")
-    public ResponseEntity<List<StudentResponseDTO>> getAllStudents() {
-        return ResponseEntity.ok(studentService.getAllStudents());
+    public ResponseEntity<List<StudentCourseViewDTO>> getAllStudents(
+            @RequestParam(required = false) String dni,
+            @RequestParam(required = false) String name
+    ) {
+        return ResponseEntity.ok(studentService.getAllStudentsFiltered(dni, name));
     }
 
     @GetMapping("/{id}")
@@ -96,4 +102,11 @@ public class StudentController {
         studentService.removeRepresentativesFromStudent(studentId, dto.getRepresentativeIds());
         return ResponseEntity.noContent().build();
     }
+
+//    @PreAuthorize("hasAuthority('GET_STUDENT_REPRESENTATIVES')")
+    @GetMapping("/{studentId}/representatives")
+    public ResponseEntity<List<RepresentativeBasicDTO>> getRepresentativesOfStudent(@PathVariable Long studentId) {
+        return ResponseEntity.ok(studentService.getRepresentativesByStudentId(studentId));
+    }
+
 }

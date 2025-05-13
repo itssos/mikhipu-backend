@@ -3,11 +3,15 @@ package pe.getsemani.mikhipu.person.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import pe.getsemani.mikhipu.person.dto.create.TeacherCreateDTO;
+import pe.getsemani.mikhipu.person.dto.response.StudentResponseDTO;
 import pe.getsemani.mikhipu.person.dto.response.TeacherResponseDTO;
 import pe.getsemani.mikhipu.person.entity.Person;
+import pe.getsemani.mikhipu.person.entity.Student;
 import pe.getsemani.mikhipu.person.entity.Teacher;
 import pe.getsemani.mikhipu.person.mapper.PersonMapper;
+import pe.getsemani.mikhipu.person.mapper.StudentMapper;
 import pe.getsemani.mikhipu.person.mapper.TeacherMapper;
+import pe.getsemani.mikhipu.person.repository.CourseRepository;
 import pe.getsemani.mikhipu.person.repository.PersonRepository;
 import pe.getsemani.mikhipu.person.repository.TeacherRepository;
 import pe.getsemani.mikhipu.role.entity.Role;
@@ -28,6 +32,8 @@ public class TeacherService {
     private final PersonMapper personMapper;
     private final UserRepository userRepository;
     private final RoleService roleService;
+    private final CourseRepository courseRepository;
+    private final StudentMapper studentMapper;
 
     public TeacherResponseDTO create(TeacherCreateDTO dto) {
         String documentNumber = dto.getPerson().getDni();
@@ -101,4 +107,12 @@ public class TeacherService {
                 .map(teacherMapper::toDto)
                 .orElseThrow(() -> new IllegalArgumentException("Docente no encontrado"));
     }
+
+    public List<StudentResponseDTO> getStudentsTaughtByTeacher(Long teacherId) {
+        List<Student> students = courseRepository.findStudentsByTeacherId(teacherId);
+        return students.stream()
+                .map(studentMapper::toDto)
+                .toList();
+    }
+
 }
