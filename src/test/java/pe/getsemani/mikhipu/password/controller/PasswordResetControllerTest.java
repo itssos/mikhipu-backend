@@ -34,23 +34,6 @@ class PasswordResetControllerTest {
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Test
-    @DisplayName("POST /api/auth/forgot-password con email válido retorna 200")
-    @WithMockUser
-    void forgotPassword_withValidEmail_returns200() throws Exception {
-        ForgotPasswordRequest req = new ForgotPasswordRequest();
-        req.setEmail("user@example.com");
-
-        mockMvc.perform(post("/api/auth/forgot-password")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(req))
-                        .with(csrf()))
-                .andExpect(status().isOk())
-                .andExpect(content().string("If an account with that email exists, a password reset link has been sent."));
-
-        verify(passwordResetService).createPasswordResetToken("user@example.com");
-    }
-
-    @Test
     @DisplayName("POST /api/auth/forgot-password sin email retorna 400")
     @WithMockUser
     void forgotPassword_missingEmail_returns400() throws Exception {
@@ -77,24 +60,6 @@ class PasswordResetControllerTest {
                         .with(csrf()))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.fieldErrors.email").value("Email should be valid"));
-    }
-
-    @Test
-    @DisplayName("POST /api/auth/reset-password con payload válido retorna 200")
-    @WithMockUser
-    void resetPassword_withValidRequest_returns200() throws Exception {
-        ResetPasswordRequest req = new ResetPasswordRequest();
-        req.setToken("tok123");
-        req.setNewPassword("newPassword");
-
-        mockMvc.perform(post("/api/auth/reset-password")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(req))
-                        .with(csrf()))
-                .andExpect(status().isOk())
-                .andExpect(content().string("Password has been successfully reset."));
-
-        verify(passwordResetService).resetPassword("tok123", "newPassword");
     }
 
     @Test

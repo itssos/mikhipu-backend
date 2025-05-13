@@ -1,26 +1,24 @@
 package pe.getsemani.mikhipu.role.service;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import pe.getsemani.mikhipu.exception.ResourceNotFoundException;
 import pe.getsemani.mikhipu.role.entity.Role;
-import pe.getsemani.mikhipu.role.enums.RoleType;
 import pe.getsemani.mikhipu.role.repository.RoleRepository;
+import pe.getsemani.mikhipu.role.service.RoleService;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-@DisplayName("Pruebas del servicio de roles")
 class RoleServiceTest {
 
     @Mock
@@ -29,110 +27,126 @@ class RoleServiceTest {
     @InjectMocks
     private RoleService roleService;
 
-    private Role sampleRole() {
-        return Role.builder()
-                .id(1)
-                .name(RoleType.ADMINISTRADOR)
-                .description("Administrador")
-                .build();
+    private Role role;
+
+    @BeforeEach
+    void setUp() {
+        role = new Role();
+        role.setId(1);
+        role.setName("DOCENTE");
+        role.setDescription("Docente rol");
     }
 
     @Test
-    @DisplayName("createRole() debe guardar y retornar el rol")
-    void createRole_savesAndReturnsRole() {
-        Role role = sampleRole();
+    @DisplayName("Debe crear un nuevo rol correctamente")
+    void createRole_success() {
         when(roleRepository.save(role)).thenReturn(role);
 
-        Role result = roleService.createRole(role);
+        Role saved = roleService.createRole(role);
 
-        assertThat(result).isSameAs(role);
-        verify(roleRepository).save(role);
+        assertNotNull(saved);
+        assertEquals("DOCENTE", saved.getName());
     }
 
     @Test
-    @DisplayName("getRoleById() debe retornar rol existente")
-    void getRoleById_existingId_returnsRole() {
-        Role role = sampleRole();
+    @DisplayName("Debe obtener rol por ID si existe")
+    void getRoleById_success() {
         when(roleRepository.findById(1)).thenReturn(Optional.of(role));
 
-        Role result = roleService.getRoleById(1);
+        Role found = roleService.getRoleById(1);
 
-        assertThat(result).isSameAs(role);
+        assertEquals("DOCENTE", found.getName());
     }
 
     @Test
-    @DisplayName("getRoleById() lanza excepción si no existe")
-    void getRoleById_nonExistingId_throwsException() {
-        when(roleRepository.findById(99)).thenReturn(Optional.empty());
+    @DisplayName("Debe lanzar excepción si rol no existe por ID")
+    void getRoleById_notFound() {
+        when(roleRepository.findById(2)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> roleService.getRoleById(99))
-                .isInstanceOf(ResourceNotFoundException.class)
-                .hasMessageContaining("Role with id 99 not found");
+        assertThrows(ResourceNotFoundException.class, () -> roleService.getRoleById(2));
     }
 
     @Test
-    @DisplayName("getAllRoles() debe retornar todos los roles")
-    void getAllRoles_returnsListOfRoles() {
-        Role r1 = sampleRole();
-        Role r2 = Role.builder().id(2).name(RoleType.DOCENTE).description("Docente").build();
-        when(roleRepository.findAll()).thenReturn(Arrays.asList(r1, r2));
+    @DisplayName("Debe obtener rol por nombre si existe")
+    void getRoleByName_success() {
+        when(roleRepository.findByName("DOCENTE")).thenReturn(Optional.of(role));
+
+        Role found = roleService.getRoleByName("DOCENTE");
+
+        assertEquals("DOCENTE", found.getName());
+    }
+
+    @Test
+    @DisplayName("Debe lanzar excepción si rol no existe por nombre")
+    void getRoleByName_notFound() {
+        when(roleRepository.findByName("FAKE")).thenReturn(Optional.empty());
+
+        assertThrows(ResourceNotFoundException.class, () -> roleService.getRoleByName("FAKE"));
+    }
+
+    @Test
+    @DisplayName("Debe retornar todos los roles excepto ADMINISTRADOR")
+    void getAllRoles_excludeAdmin() {
+        Role admin = new Role();
+        admin.setName("ADMINISTRADOR");
+        Role docente = new Role();
+        docente.setName("DOCENTE");
+
+        when(roleRepository.findAll()).thenReturn(List.of(admin, docente));
 
         List<Role> result = roleService.getAllRoles();
 
-        assertThat(result).hasSize(2).containsExactly(r1, r2);
+        assertEquals(1, result.size());
+        assertEquals("DOCENTE", result.get(0).getName());
     }
 
     @Test
-    @DisplayName("updateRole() debe actualizar y retornar el rol")
-    void updateRole_existingId_updatesAndReturnsRole() {
-        Role existing = sampleRole();
-        Role details = Role.builder()
-                .name(RoleType.ESTUDIANTE)
-                .description("Estudiante")
-                .build();
-        when(roleRepository.findById(1)).thenReturn(Optional.of(existing));
-        when(roleRepository.save(any(Role.class))).thenAnswer(invocation -> invocation.getArgument(0));
+    @DisplayName("Debe actualizar la descripción del rol si el nombre coincide")
+    void updateRole_success() {
+        Role updateData = new Role();
+        updateData.setName("DOCENTE");
+        updateData.setDescription("Nuevo desc");
 
-        Role result = roleService.updateRole(1, details);
-
-        assertThat(result.getId()).isEqualTo(1);
-        assertThat(result.getName()).isEqualTo(RoleType.ESTUDIANTE);
-        assertThat(result.getDescription()).isEqualTo("Estudiante");
-        ArgumentCaptor<Role> captor = ArgumentCaptor.forClass(Role.class);
-        verify(roleRepository).save(captor.capture());
-        Role saved = captor.getValue();
-        assertThat(saved.getName()).isEqualTo(details.getName());
-    }
-
-    @Test
-    @DisplayName("deleteRole() debe eliminar el rol existente")
-    void deleteRole_existingId_deletesRole() {
-        Role role = sampleRole();
         when(roleRepository.findById(1)).thenReturn(Optional.of(role));
+        when(roleRepository.save(role)).thenReturn(role);
+
+        Role updated = roleService.updateRole(1, updateData);
+
+        assertEquals("Nuevo desc", updated.getDescription());
+    }
+
+    @Test
+    @DisplayName("Debe lanzar excepción si se intenta cambiar el nombre del rol")
+    void updateRole_changeName_invalid() {
+        Role updateData = new Role();
+        updateData.setName("ALGO");
+
+        when(roleRepository.findById(1)).thenReturn(Optional.of(role));
+
+        assertThrows(IllegalStateException.class, () -> roleService.updateRole(1, updateData));
+    }
+
+    @Test
+    @DisplayName("Debe eliminar rol si no es protegido")
+    void deleteRole_success() {
+        Role custom = new Role();
+        custom.setName("OTRO");
+
+        when(roleRepository.findById(1)).thenReturn(Optional.of(custom));
 
         roleService.deleteRole(1);
 
-        verify(roleRepository).delete(role);
+        verify(roleRepository).delete(custom);
     }
 
     @Test
-    @DisplayName("getRoleByType() debe retornar rol por tipo")
-    void getRoleByType_existingType_returnsRole() {
-        Role role = sampleRole();
-        when(roleRepository.findByName("ADMINISTRADOR")).thenReturn(Optional.of(role));
+    @DisplayName("Debe lanzar excepción al intentar eliminar rol protegido")
+    void deleteRole_protected() {
+        Role protectedRole = new Role();
+        protectedRole.setName("ESTUDIANTE");
 
-        Role result = roleService.getRoleByType(RoleType.ADMINISTRADOR);
+        when(roleRepository.findById(1)).thenReturn(Optional.of(protectedRole));
 
-        assertThat(result).isSameAs(role);
-    }
-
-    @Test
-    @DisplayName("getRoleByType() lanza excepción si no encuentra el tipo")
-    void getRoleByType_nonExistingType_throwsException() {
-        when(roleRepository.findByName("ESTUDIANTE")).thenReturn(Optional.empty());
-
-        assertThatThrownBy(() -> roleService.getRoleByType(RoleType.ESTUDIANTE))
-                .isInstanceOf(ResourceNotFoundException.class)
-                .hasMessageContaining("Role ESTUDIANTE not found");
+        assertThrows(IllegalStateException.class, () -> roleService.deleteRole(1));
     }
 }

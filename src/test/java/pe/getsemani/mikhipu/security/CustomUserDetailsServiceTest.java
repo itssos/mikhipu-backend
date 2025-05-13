@@ -1,60 +1,79 @@
 package pe.getsemani.mikhipu.security;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.InjectMocks;
+import org.mockito.MockitoAnnotations;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import pe.getsemani.mikhipu.role.enums.RoleType;
-import pe.getsemani.mikhipu.user.entity.User;
+import pe.getsemani.mikhipu.role.entity.Permission;
 import pe.getsemani.mikhipu.role.entity.Role;
+import pe.getsemani.mikhipu.user.entity.User;
 import pe.getsemani.mikhipu.user.repository.UserRepository;
 
-import java.util.Collections;
 import java.util.Optional;
+import java.util.Set;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-@ExtendWith(MockitoExtension.class)
-@DisplayName("Pruebas de CustomUserDetailsService")
 class CustomUserDetailsServiceTest {
 
     @Mock
     private UserRepository userRepository;
 
     @InjectMocks
-    private CustomUserDetailsService service;
+    private CustomUserDetailsService userDetailsService;
 
-    @Test
-    @DisplayName("Debe cargar el usuario por nombre de usuario correctamente")
-    void shouldLoadUserByUsername() {
-        User user = mock(User.class);
-        Role role = mock(Role.class);
-        when(role.getName()).thenReturn(RoleType.ESTUDIANTE);
-        when(user.getUsername()).thenReturn("user");
-        when(user.getPassword()).thenReturn("pass");
-        when(user.getRoles()).thenReturn(Collections.singleton(role));
-        when(user.isActive()).thenReturn(true);
-        when(userRepository.findByUsername("user")).thenReturn(Optional.of(user));
-
-        UserDetails details = service.loadUserByUsername("user");
-
-        assertThat(details.getUsername()).isEqualTo("user");
-        assertThat(details.getPassword()).isEqualTo("pass");
-        assertThat(details.getAuthorities()).hasSize(1);
-        assertThat(details.isEnabled()).isTrue();
+    @BeforeEach
+    void setUp() {
+        MockitoAnnotations.openMocks(this);
     }
 
     @Test
-    @DisplayName("Debe lanzar excepción cuando no se encuentra el usuario")
-    void shouldThrowWhenUserNotFound() {
-        when(userRepository.findByUsername("unknown")).thenReturn(Optional.empty());
+    @DisplayName("Debe cargar detalles del usuario con sus roles y permisos")
+    void debeCargarDetallesDeUsuario() {
+        // Arrange
+        Permission permiso1 = new Permission();
+        permiso1.setId(1);
+        permiso1.setName("PERMISO_VER");
 
-        assertThatThrownBy(() -> service.loadUserByUsername("unknown"))
-                .isInstanceOf(UsernameNotFoundException.class);
+        Role rol = new Role();
+        rol.setId(1);
+        rol.setName("ADMIN");
+        rol.setPermissions(Set.of(permiso1));
+
+        User user = new User();
+        user.setId(1);
+        user.setUsername("usuario1");
+        user.setPassword("secreta");
+        user.setRole(rol);
+        user.setActive(true);
+
+        when(userRepository.findByUsername("usuario1")).thenReturn(Optional.of(user));
+
+        // Act
+        UserDetails userDetails = userDetailsService.loadUserByUsername("usuario1");
+
+        // Assert
+        assertEquals("usuario1", userDetails.getUsername());
+        assertEquals("secreta", userDetails.getPassword());
+        assertTrue(userDetails.getAuthorities().stream()
+                .anyMatch(auth -> auth.getAuthority().equals("ROLE_ADMIN")));
+        assertTrue(userDetails.getAuthorities().stream()
+                .anyMatch(auth -> auth.getAuthority().equals("PERMISO_VER")));
+    }
+
+    @Test
+    @DisplayName("Debe lanzar excepción si el usuario no existe")
+    void debeLanzarExcepcionSiUsuarioNoExiste() {
+        when(userRepository.findByUsername("no_existe")).thenReturn(Optional.empty());
+
+        UsernameNotFoundException ex = assertThrows(UsernameNotFoundException.class, () ->
+                userDetailsService.loadUserByUsername("no_existe"));
+
+        assertEquals("Usuario no encontrado: no_existe", ex.getMessage());
     }
 }

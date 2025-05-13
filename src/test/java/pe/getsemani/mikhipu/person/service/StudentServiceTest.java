@@ -1,156 +1,221 @@
 package pe.getsemani.mikhipu.person.service;
 
-import jakarta.validation.Validator;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import pe.getsemani.mikhipu.exception.ResourceNotFoundException;
+import org.springframework.web.multipart.MultipartFile;
+import pe.getsemani.mikhipu.person.dto.UploadResponse;
+import pe.getsemani.mikhipu.person.dto.basic.RepresentativeBasicDTO;
+import pe.getsemani.mikhipu.person.dto.basic.RepresentativeBasicProjection;
+import pe.getsemani.mikhipu.person.dto.create.StudentCreateDTO;
+import pe.getsemani.mikhipu.person.dto.create.PersonCreateDTO;
+import pe.getsemani.mikhipu.person.dto.response.StudentCourseViewDTO;
+import pe.getsemani.mikhipu.person.dto.response.StudentResponseDTO;
+import pe.getsemani.mikhipu.person.entity.Person;
 import pe.getsemani.mikhipu.person.entity.Student;
+import pe.getsemani.mikhipu.person.entity.Representative;
+import pe.getsemani.mikhipu.person.enums.Gender;
 import pe.getsemani.mikhipu.person.enums.SchoolLevel;
 import pe.getsemani.mikhipu.person.enums.Section;
+import pe.getsemani.mikhipu.person.mapper.PersonMapper;
+import pe.getsemani.mikhipu.person.mapper.StudentMapper;
+import pe.getsemani.mikhipu.person.repository.PersonRepository;
+import pe.getsemani.mikhipu.person.repository.RepresentativeRepository;
 import pe.getsemani.mikhipu.person.repository.StudentRepository;
-import pe.getsemani.mikhipu.role.entity.Role;
-import pe.getsemani.mikhipu.role.repository.RoleRepository;
+import pe.getsemani.mikhipu.person.repository.StudentRepresentativeRepository;
+import pe.getsemani.mikhipu.user.entity.User;
 import pe.getsemani.mikhipu.user.repository.UserRepository;
 
-import java.time.LocalDate;
-import java.util.Arrays;
-import java.util.Optional;
+import java.io.InputStream;
+import java.util.*;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-@DisplayName("Pruebas del servicio de estudiantes")
 class StudentServiceTest {
 
     @Mock
     private StudentRepository studentRepository;
-
     @Mock
-    private RoleRepository roleRepository;
-
+    private RepresentativeRepository representativeRepository;
+    @Mock
+    private PersonService personService;
+    @Mock
+    private PersonMapper personMapper;
+    @Mock
+    private StudentMapper studentMapper;
+    @Mock
+    private StudentRepresentativeRepository studentRepresentativeRepository;
     @Mock
     private UserRepository userRepository;
-
     @Mock
-    private Validator validator;
-
+    private RepresentativeBasicProjection projection;
     @Mock
-    private PasswordEncoder passwordEncoder;
+    private PersonRepository personRepository;
+
 
     @InjectMocks
-    private OldStudentService studentService;
+    private StudentService studentService;
 
-    // Método auxiliar para crear un estudiante dummy
-    private Student createDummyStudent() {
-        Student student = new Student();
-        student.setId(1L);
-        student.setFirstName("Juan");
-        student.setLastName("Perez");
-        student.setDni("12345678");
-        student.setBirthDate(LocalDate.of(2005, 5, 1));
-        student.setGender("M");
-        student.setAddress("Calle 123");
-        student.setPhone("987654321");
-        student.setGrade(3);
-        student.setSection(Section.A);
-        student.setSchoolLevel(SchoolLevel.PRIMARIA);
-        return student;
+    private StudentCreateDTO dto;
+    private Person person;
+    private Student student;
+    private StudentResponseDTO responseDTO;
+
+    @BeforeEach
+    void setUp() {
+        // Iniciar objetos base
+        person = new Person();
+        student = new Student();
+        responseDTO = new StudentResponseDTO();
+
+        dto = new StudentCreateDTO();
+        PersonCreateDTO pDto = new PersonCreateDTO();
+        pDto.setFirstName("Juan");
+        pDto.setLastName("Perez");
+        pDto.setDni("12345678");
+        pDto.setBirthDate(java.time.LocalDate.of(2005,1,1));
+        pDto.setGender(Gender.MASCULINO);
+        pDto.setAddress("Av. Siempre Viva 123");
+        pDto.setPhone("987654321");
+        dto.setPerson(pDto);
+        dto.setGrade(10);
+        dto.setSection(Section.A);
+        dto.setSchoolLevel(SchoolLevel.PRIMARIA);
+        dto.setRepresentativeIds(Set.of(1L));
     }
 
     @Test
-    @DisplayName("Debe listar todos los estudiantes")
-    void listAllStudents_returnsListOfStudents() {
-        Student student1 = createDummyStudent();
-        Student student2 = createDummyStudent();
-        student2.setId(2L);
-        when(studentRepository.findAll()).thenReturn(Arrays.asList(student1, student2));
+    @DisplayName("Debe crear un estudiante correctamente con representante")
+    void createStudent_success() {
+        when(studentMapper.fromCreateDto(dto)).thenReturn(student);
+        when(personMapper.fromCreateDto(dto.getPerson())).thenReturn(person);
+        when(personService.saveRaw(person)).thenReturn(person);
+        when(representativeRepository.findAllById(dto.getRepresentativeIds()))
+                .thenReturn(List.of(new Representative()));
+        when(studentRepository.save(student)).thenReturn(student);
+        when(studentMapper.toDto(student)).thenReturn(responseDTO);
 
-        var result = studentService.listAllStudents();
+        StudentResponseDTO result = studentService.createStudent(dto);
 
-        assertThat(result).hasSize(2);
+        assertNotNull(result);
+        verify(personService).saveRaw(person);
+        verify(studentRepository).save(student);
     }
 
     @Test
-    @DisplayName("Debe obtener un estudiante por ID")
-    void getStudentById_returnsStudent() {
-        Student student = createDummyStudent();
-        when(studentRepository.findById(1L)).thenReturn(Optional.of(student));
+    @DisplayName("Debe actualizar un estudiante existente correctamente")
+    void updateStudent_success() {
+        Long id = 1L;
+        when(studentRepository.findById(id)).thenReturn(Optional.of(student));
+        // Pre-cargar datos previos en student.person
+        person = new Person(); student.setPerson(person);
+        when(personService.saveRaw(person)).thenReturn(person);
+        when(representativeRepository.findAllById(dto.getRepresentativeIds()))
+                .thenReturn(List.of(new Representative()));
+        when(studentRepository.save(student)).thenReturn(student);
+        when(studentMapper.toDto(student)).thenReturn(responseDTO);
 
-        var result = studentService.getStudentById(1L);
+        StudentResponseDTO result = studentService.updateStudent(id, dto);
 
-        assertThat(result.getId()).isEqualTo(1L);
-        assertThat(result.getFirstName()).isEqualTo("Juan");
+        assertNotNull(result);
+        assertEquals(10, student.getGrade());
+        verify(personService).saveRaw(person);
+        verify(studentRepository).save(student);
     }
 
     @Test
-    @DisplayName("Debe lanzar excepción si no se encuentra el estudiante por ID")
-    void getStudentById_throwsException_whenStudentNotFound() {
-        when(studentRepository.findById(1L)).thenReturn(Optional.empty());
+    @DisplayName("Debe obtener un estudiante por ID exitosamente")
+    void getStudentById_success() {
+        Long id = 2L;
+        when(studentRepository.findById(id)).thenReturn(Optional.of(student));
+        when(studentMapper.toDto(student)).thenReturn(responseDTO);
 
-        assertThatThrownBy(() -> studentService.getStudentById(1L))
-                .isInstanceOf(ResourceNotFoundException.class)
-                .hasMessageContaining("No se encontró al estudiante con ID:");
+        StudentResponseDTO result = studentService.getStudentById(id);
+
+        assertNotNull(result);
+        verify(studentRepository).findById(id);
     }
 
     @Test
-    @DisplayName("Debe crear un estudiante asignando usuario y rol")
-    void createStudent_createsStudent() {
-        Student student = createDummyStudent();
-        student.setUser(null);
+    @DisplayName("Debe lanzar excepción si el estudiante no existe al obtener por ID")
+    void getStudentById_notFound() {
+        when(studentRepository.findById(99L)).thenReturn(Optional.empty());
 
-        // Simular codificación de contraseña
-        when(passwordEncoder.encode(student.getDni())).thenReturn("encodedPassword");
-        // Simular la búsqueda del rol de ESTUDIANTE
-        Role role = new Role();
-        role.setId(1);
-        role.setName("ESTUDIANTE");
-        when(roleRepository.findByName("ESTUDIANTE")).thenReturn(Optional.of(role));
-        // Simular la persistencia del estudiante
-        when(studentRepository.save(student)).thenAnswer(invocation -> {
-            Student s = invocation.getArgument(0);
-            s.setId(1L);
-            return s;
-        });
-
-        Student createdStudent = studentService.createStudent(student);
-
-        assertThat(createdStudent.getId()).isNotNull();
-        assertThat(createdStudent.getUser()).isNotNull();
-        assertThat(createdStudent.getUser().getUsername()).isEqualTo(student.getDni());
-        verify(passwordEncoder).encode(student.getDni());
+        assertThrows(RuntimeException.class, () -> studentService.getStudentById(99L));
     }
 
     @Test
-    @DisplayName("Debe actualizar un estudiante existente")
-    void updateStudent_updatesStudent() {
-        Student student = createDummyStudent();
-        when(studentRepository.findById(1L)).thenReturn(Optional.of(student));
-        Student updatedDetails = createDummyStudent();
-        updatedDetails.setFirstName("Actualizado");
+    @DisplayName("Debe eliminar un estudiante y sus entidades relacionadas")
+    void deleteStudent_success() {
+        Long id = 3L;
+        User user = new User();
+        person.setUser(user);
+        student.setPerson(person);
+        when(studentRepository.findById(id)).thenReturn(Optional.of(student));
 
-        when(studentRepository.save(any(Student.class))).thenAnswer(invocation -> invocation.getArgument(0));
-
-        Student updatedStudent = studentService.updateStudent(1L, updatedDetails);
-
-        assertThat(updatedStudent.getFirstName()).isEqualTo("Actualizado");
-    }
-
-    @Test
-    @DisplayName("Debe eliminar un estudiante")
-    void deleteStudent_deletesStudent() {
-        Student student = createDummyStudent();
-        when(studentRepository.findById(1L)).thenReturn(Optional.of(student));
-
-        studentService.deleteStudent(1L);
+        studentService.deleteStudent(id);
 
         verify(studentRepository).delete(student);
+        verify(userRepository).delete(user);
+        verify(personMapper, never()).fromCreateDto(any()); // No mapea persona en borrado
+    }
+
+    @Test
+    @DisplayName("Debe lanzar excepción si intenta eliminar estudiante inexistente")
+    void deleteStudent_notFound() {
+        when(studentRepository.findById(7L)).thenReturn(Optional.empty());
+
+        assertThrows(IllegalArgumentException.class, () -> studentService.deleteStudent(7L));
+    }
+
+    @Test
+    @DisplayName("Debe asignar representantes a un estudiante existente")
+    void assignRepresentatives_success() {
+        Long id = 4L;
+        student.setRepresentatives(new HashSet<>());
+        when(studentRepository.findById(id)).thenReturn(Optional.of(student));
+        when(representativeRepository.findAllById(dto.getRepresentativeIds()))
+                .thenReturn(List.of(new Representative()));
+
+        studentService.assignRepresentativesToStudent(id, dto.getRepresentativeIds());
+
+        verify(studentRepository).save(student);
+        assertFalse(student.getRepresentatives().isEmpty());
+    }
+
+    @Test
+    @DisplayName("Debe remover representantes de un estudiante existente")
+    void removeRepresentatives_success() {
+        Long id = 5L;
+        when(studentRepository.findById(id)).thenReturn(Optional.of(student));
+
+        studentService.removeRepresentativesFromStudent(id, Set.of(1L,2L));
+
+        verify(studentRepresentativeRepository).removeRepresentativesFromStudent(id, Set.of(1L,2L));
+    }
+
+    @Test
+    @DisplayName("Debe obtener lista de representantes básicos por estudiante")
+    void getRepresentativesByStudentId_success() {
+        Long id = 6L;
+
+        // Configuramos el mock de proyección
+        when(projection.getId()).thenReturn(10L);
+        when(projection.getFullName()).thenReturn("Ana María");
+
+        when(studentRepository.findRepresentativesByStudentId(id))
+                .thenReturn(List.of(projection));
+
+        List<RepresentativeBasicDTO> result = studentService.getRepresentativesByStudentId(id);
+
+        assertEquals(1, result.size());
+        assertEquals(10L, result.get(0).getId());
+        assertEquals("Ana María", result.get(0).getFullName());
     }
 }

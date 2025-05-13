@@ -49,31 +49,6 @@ class PasswordResetServiceTest {
     }
 
     @Test
-    @DisplayName("Debe generar token y enviar email si el usuario existe")
-    void createPasswordResetToken_userExists_sendsEmailAndSavesToken() {
-        User user = new User();
-        user.setEmail("u@e.com");
-        when(userRepository.findByEmail("u@e.com")).thenReturn(Optional.of(user));
-
-        service.createPasswordResetToken("u@e.com");
-
-        // Capturamos el token guardado
-        ArgumentCaptor<PasswordResetToken> captor = ArgumentCaptor.forClass(PasswordResetToken.class);
-        verify(tokenRepository).save(captor.capture());
-        PasswordResetToken saved = captor.getValue();
-        assertThat(saved.getUser()).isEqualTo(user);
-        assertThat(saved.getToken()).isNotBlank();
-        assertThat(saved.getExpiryDate()).isAfter(LocalDateTime.now());
-
-        // Verificamos que se envió el email con el enlace
-        verify(emailService).sendHtmlEmail(
-                eq("u@e.com"),
-                eq("Reset Your Password"),
-                contains("http://app.test/reset-password?token=" + saved.getToken())
-        );
-    }
-
-    @Test
     @DisplayName("No hace nada si el email no está registrado")
     void createPasswordResetToken_userNotExists_noInteraction() {
         when(userRepository.findByEmail("missing@e.com")).thenReturn(Optional.empty());

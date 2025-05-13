@@ -1,27 +1,32 @@
 package pe.getsemani.mikhipu.security;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.security.SignatureException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.HttpServletRequest;
-import org.junit.jupiter.api.AfterEach;
+import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.mock.web.DelegatingServletOutputStream;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
-import java.util.Collections;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import org.springframework.security.core.userdetails.UserDetailsService;
 
-@DisplayName("Pruebas del filtro de autenticación JWT")
+import java.io.ByteArrayOutputStream;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
 class JwtAuthenticationFilterTest {
 
     @Mock
@@ -30,67 +35,97 @@ class JwtAuthenticationFilterTest {
     @Mock
     private CustomUserDetailsService userDetailsService;
 
-    @InjectMocks
-    private JwtAuthenticationFilter filter;
-
     @Mock
     private HttpServletRequest request;
 
-    // Usamos un objeto real de respuesta para capturar el estado asignado.
-    private MockHttpServletResponse response;
+    @Mock
+    private HttpServletResponse response;
 
     @Mock
-    private FilterChain chain;
+    private FilterChain filterChain;
+
+    @InjectMocks
+    private JwtAuthenticationFilter jwtAuthenticationFilter;
+
+    private final ObjectMapper mapper = new ObjectMapper();
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        response = new MockHttpServletResponse();
-    }
-
-    @AfterEach
-    void tearDown() {
-        SecurityContextHolder.clearContext();
+        jwtAuthenticationFilter = new JwtAuthenticationFilter(tokenProvider, userDetailsService);
     }
 
     @Test
-    @DisplayName("Debe omitir autenticación cuando no existe cabecera Authorization")
-    void shouldSkipAuthenticationWhenNoAuthorizationHeader() throws Exception {
+    @DisplayName("Debe autenticar correctamente con un token válido")
+    void autenticarConTokenValido() throws Exception {
+        String token = "token.valido";
+        String username = "usuario";
+
+        when(request.getHeader("Authorization")).thenReturn("Bearer " + token);
+        when(tokenProvider.validateToken(token)).thenReturn(true);
+        when(tokenProvider.getUsername(token)).thenReturn(username);
+
+        UserDetails userDetails = new User(username, "password", List.of());
+        when(userDetailsService.loadUserByUsername(username)).thenReturn(userDetails);
+
+        jwtAuthenticationFilter.doFilterInternal(request, response, filterChain);
+
+        verify(tokenProvider).validateToken(token);
+        verify(tokenProvider).getUsername(token);
+        verify(userDetailsService).loadUserByUsername(username);
+        verify(filterChain).doFilter(request, response);
+    }
+
+    @Test
+    @DisplayName("Debe retornar 401 si el token ha expirado")
+    void tokenExpiradoRetorna401() throws Exception {
+        String token = "token.expirado";
+        when(request.getHeader("Authorization")).thenReturn("Bearer " + token);
+        when(tokenProvider.validateToken(token)).thenThrow(new ExpiredJwtException(null, null, "Token expirado"));
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        DelegatingServletOutputStream servletOutputStream = new DelegatingServletOutputStream(baos);
+        when(response.getOutputStream()).thenReturn(servletOutputStream);
+
+        when(request.getRequestURI()).thenReturn("/api/test");
+
+        jwtAuthenticationFilter.doFilterInternal(request, response, filterChain);
+
+        verify(response).setStatus(HttpStatus.UNAUTHORIZED.value());
+        String responseBody = baos.toString();
+        assertTrue(responseBody.contains("Token expirado"));
+        verifyNoInteractions(filterChain);
+    }
+
+    @Test
+    @DisplayName("Debe retornar 401 si la firma del token es inválida")
+    void firmaInvalidaRetorna401() throws Exception {
+        String token = "token.invalido";
+        when(request.getHeader("Authorization")).thenReturn("Bearer " + token);
+        when(tokenProvider.validateToken(token)).thenThrow(new SignatureException("Firma inválida"));
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        DelegatingServletOutputStream servletOutputStream = new DelegatingServletOutputStream(baos);
+        when(response.getOutputStream()).thenReturn(servletOutputStream);
+        when(request.getRequestURI()).thenReturn("/api/test");
+
+        jwtAuthenticationFilter.doFilterInternal(request, response, filterChain);
+
+        verify(response).setStatus(HttpStatus.UNAUTHORIZED.value());
+        String responseBody = baos.toString();
+        assertTrue(responseBody.contains("The JWT token signature is invalid"));
+        verifyNoInteractions(filterChain);
+    }
+
+    @Test
+    @DisplayName("Debe continuar la cadena si no hay cabecera Authorization")
+    void sinTokenContinuaCadena() throws Exception {
         when(request.getHeader("Authorization")).thenReturn(null);
-        filter.doFilterInternal(request, response, chain);
-        verify(chain).doFilter(request, response);
-        assertThat(SecurityContextHolder.getContext().getAuthentication()).isNull();
-    }
 
-    @Test
-    @DisplayName("Debe omitir autenticación cuando el token es inválido")
-    void shouldSkipAuthenticationWhenTokenIsInvalid() throws Exception {
-        when(request.getHeader("Authorization")).thenReturn("Bearer token");
-        // Simulamos que al validar el token se lanza una SignatureException.
-        when(tokenProvider.validateToken("token")).thenThrow(new io.jsonwebtoken.security.SignatureException("invalid signature"));
+        jwtAuthenticationFilter.doFilterInternal(request, response, filterChain);
 
-        filter.doFilterInternal(request, response, chain);
-        // Verificamos que no se invoque chain.doFilter.
-        verify(chain, never()).doFilter(request, response);
-        assertThat(SecurityContextHolder.getContext().getAuthentication()).isNull();
-        // Se espera que el filtro configure el status a 401 (Unauthorized)
-        assertThat(response.getStatus()).isEqualTo(HttpStatus.UNAUTHORIZED.value());
-    }
-
-    @Test
-    @DisplayName("Debe autenticar cuando el token es válido")
-    void shouldAuthenticateWhenTokenIsValid() throws Exception {
-        when(request.getHeader("Authorization")).thenReturn("Bearer valid");
-        when(tokenProvider.validateToken("valid")).thenReturn(true);
-        when(tokenProvider.getUsername("valid")).thenReturn("user");
-        UserDetails userDetails = mock(UserDetails.class);
-        when(userDetails.getAuthorities()).thenReturn(Collections.emptyList());
-        when(userDetailsService.loadUserByUsername("user")).thenReturn(userDetails);
-
-        filter.doFilterInternal(request, response, chain);
-        verify(chain).doFilter(request, response);
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        assertThat(auth).isNotNull();
-        assertThat(auth.getPrincipal()).isEqualTo(userDetails);
+        verify(filterChain).doFilter(request, response);
+        verifyNoInteractions(tokenProvider);
+        verifyNoInteractions(userDetailsService);
     }
 }

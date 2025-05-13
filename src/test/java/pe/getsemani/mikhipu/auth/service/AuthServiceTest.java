@@ -1,92 +1,121 @@
 package pe.getsemani.mikhipu.auth.service;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.ArgumentMatchers;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.web.server.ResponseStatusException;
 import pe.getsemani.mikhipu.auth.dto.JwtAuthResponse;
 import pe.getsemani.mikhipu.auth.dto.LoginRequest;
+import pe.getsemani.mikhipu.person.dto.response.PersonResponseDTO;
+import pe.getsemani.mikhipu.person.entity.Person;
+import pe.getsemani.mikhipu.person.mapper.PersonMapper;
+import pe.getsemani.mikhipu.person.repository.PersonRepository;
 import pe.getsemani.mikhipu.role.repository.RoleRepository;
-import pe.getsemani.mikhipu.user.repository.UserRepository;
 import pe.getsemani.mikhipu.security.JwtTokenProvider;
+import pe.getsemani.mikhipu.user.entity.User;
+import pe.getsemani.mikhipu.user.repository.UserRepository;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.ThrowableAssert.catchThrowableOfType;
+import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-@ExtendWith(MockitoExtension.class)
-@DisplayName("Pruebas del AuthService")
+@DisplayName("Pruebas unitarias del servicio AuthService")
 class AuthServiceTest {
 
-    @Mock
     private AuthenticationManager authenticationManager;
-
-    @Mock
     private JwtTokenProvider tokenProvider;
-
-    @Mock
     private UserRepository userRepository;
-
-    @Mock
+    private PersonRepository personRepository;
     private RoleRepository roleRepository;
+    private PersonMapper personMapper;
 
-    @Mock
-    private org.springframework.security.crypto.password.PasswordEncoder passwordEncoder;
-
-    @InjectMocks
     private AuthService authService;
 
-    @Test
-    @DisplayName("con credenciales válidas retorna un JWT y su tipo")
-    void authenticate_withValidCredentials_returnsJwtAuthResponse() {
-        // Arrange
-        String rawUsername = "john.doe";
-        String rawPassword = "s3cr3t";
-        LoginRequest request = new LoginRequest();
-        request.setUsername(rawUsername);
-        request.setPassword(rawPassword);
+    @BeforeEach
+    void setUp() {
+        authenticationManager = mock(AuthenticationManager.class);
+        tokenProvider = mock(JwtTokenProvider.class);
+        userRepository = mock(UserRepository.class);
+        personRepository = mock(PersonRepository.class);
+        roleRepository = mock(RoleRepository.class);
+        personMapper = mock(PersonMapper.class);
 
-        var fakeAuth = new UsernamePasswordAuthenticationToken(rawUsername, rawPassword);
-        when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
-                .thenReturn(fakeAuth);
-        when(tokenProvider.generateToken(fakeAuth))
-                .thenReturn("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9");
-
-        // Act
-        JwtAuthResponse response = authService.authenticate(request);
-
-        // Assert
-        assertThat(response).isNotNull();
-        assertThat(response.getToken()).isEqualTo("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9");
-        assertThat(response.getTokenType()).isEqualTo("Bearer");
-
-        // Verificamos que se hayan invocado correctamente AuthenticationManager y TokenProvider
-        verify(authenticationManager).authenticate(
-                new UsernamePasswordAuthenticationToken(rawUsername, rawPassword));
-        verify(tokenProvider).generateToken(fakeAuth);
+        authService = new AuthService(
+                authenticationManager, tokenProvider, userRepository,
+                personRepository, roleRepository, personMapper
+        );
     }
 
     @Test
-    @DisplayName("con credenciales incorrectas lanza BadCredentialsException")
-    void authenticate_withBadCredentials_throwsBadCredentialsException() {
+    @DisplayName("Debe autenticar exitosamente y retornar token y persona")
+    void autenticarConExito() {
         // Arrange
-        LoginRequest request = new LoginRequest();
-        request.setUsername("invalid");
-        request.setPassword("wrong");
+        LoginRequest loginRequest = new LoginRequest();
+        loginRequest.setUsername("usuario");
+        loginRequest.setPassword("clave");
 
-        when(authenticationManager.authenticate(any()))
-                .thenThrow(new BadCredentialsException("Bad credentials"));
+        User user = new User();
+        user.setUsername("usuario");
 
-        // Act & Assert
-        BadCredentialsException ex = catchThrowableOfType(
-                () -> authService.authenticate(request),
-                BadCredentialsException.class);
+        Person person = new Person();
+        PersonResponseDTO personDto = new PersonResponseDTO();
 
-        assertThat(ex.getMessage()).contains("Bad credentials");
+        when(userRepository.findByUsername("usuario")).thenReturn(Optional.of(user));
+        when(personRepository.findByUserUsername("usuario")).thenReturn(Optional.of(person));
+        when(personMapper.toDto(person)).thenReturn(personDto);
+        when(tokenProvider.generateToken(any())).thenReturn("token.jwt");
+
+        // Act
+        JwtAuthResponse response = authService.authenticate(loginRequest);
+
+        // Assert
+        assertNotNull(response);
+        assertEquals("token.jwt", response.getToken()); // acceso directo al campo
+        assertEquals("Bearer", response.getTokenType());
+        assertEquals(personDto, response.getPerson());
+        verify(authenticationManager).authenticate(any(UsernamePasswordAuthenticationToken.class));
+    }
+
+    @Test
+    @DisplayName("Debe lanzar excepción si el usuario no existe")
+    void autenticarUsuarioNoEncontrado() {
+        LoginRequest loginRequest = new LoginRequest();
+        loginRequest.setUsername("noexiste");
+        loginRequest.setPassword("clave");
+
+        when(userRepository.findByUsername("noexiste")).thenReturn(Optional.empty());
+
+        ResponseStatusException ex = assertThrows(ResponseStatusException.class, () ->
+                authService.authenticate(loginRequest));
+
+        assertEquals(HttpStatus.NOT_FOUND, ex.getStatusCode());
+        assertTrue(ex.getReason().contains("User not found"));
+    }
+
+    @Test
+    @DisplayName("Debe autenticar aunque no haya persona asociada")
+    void autenticarSinPersona() {
+        LoginRequest loginRequest = new LoginRequest();
+        loginRequest.setUsername("usuario");
+        loginRequest.setPassword("clave");
+
+        User user = new User();
+        user.setUsername("usuario");
+
+        when(userRepository.findByUsername("usuario")).thenReturn(Optional.of(user));
+        when(personRepository.findByUserUsername("usuario")).thenReturn(Optional.empty());
+        when(tokenProvider.generateToken(any())).thenReturn("token.jwt");
+
+        JwtAuthResponse response = authService.authenticate(loginRequest);
+
+        assertNotNull(response);
+        assertEquals("token.jwt", response.getToken());
+        assertEquals("Bearer", response.getTokenType());
+        assertNull(response.getPerson());
     }
 }
