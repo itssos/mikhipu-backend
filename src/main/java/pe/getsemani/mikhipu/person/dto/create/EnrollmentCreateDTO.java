@@ -1,4 +1,4 @@
-package pe.getsemani.mikhipu.person.dto;
+package pe.getsemani.mikhipu.person.dto.create;
 
 
 import jakarta.validation.constraints.NotBlank;
@@ -6,8 +6,11 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import pe.getsemani.mikhipu.person.enums.EnrollmentStatus;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
+
 @Data
-public class UpdateEnrollmentStatusDTO {
+public class EnrollmentCreateDTO {
 
     @NotNull
     private Long studentId;
@@ -16,5 +19,14 @@ public class UpdateEnrollmentStatusDTO {
     private String year;
 
     @NotNull
+    private BigDecimal enrollmentFee;
+
+    @NotNull
+    private BigDecimal monthlyFee;
+
+    @NotNull
     private EnrollmentStatus status;
+
+    @NotNull
+    private LocalDate enrollmentDate;
 }

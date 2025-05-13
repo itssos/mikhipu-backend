@@ -10,6 +10,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -17,6 +18,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import pe.getsemani.mikhipu.person.enums.EnrollmentStatus;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @Entity
@@ -35,9 +37,15 @@ public class Enrollment {
     @JoinColumn(name = "student_id")
     private Student student;
 
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "course_id")
-    private Course course;
+    @NotNull
+    @NotEmpty
+    private String year;
+
+    @Column(name = "tuition_fee")
+    private BigDecimal monthlyFee;
+
+    @Column(name = "enrollment_fee")
+    private BigDecimal enrollmentFee;
 
     @NotNull
     @Enumerated(EnumType.STRING)
