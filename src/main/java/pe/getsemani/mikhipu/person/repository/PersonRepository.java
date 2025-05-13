@@ -8,4 +8,6 @@ import pe.getsemani.mikhipu.person.entity.Person;
 @Repository
 public interface PersonRepository extends JpaRepository<Person, Long> {
     Optional<Person> findByUserUsername(String username);
+
+    Optional<Person> findByDni(String documentNumber);
 }
