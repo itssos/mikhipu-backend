@@ -76,4 +76,4 @@ El proyecto cuenta con múltiples pruebas unitarias en los siguientes paquetes:
 1. Clonar el repositorio
 2. Configurar la base de datos en `application.properties`
 3. Ejecutar la clase principal: `MikhipuApplication.java`
-4. Acceder a la documentación en `http://localhost:8080/swagger-ui.html` (si está habilitada)
+4. Acceder a la documentación en `http://localhost:8080/swagger-ui.html`
