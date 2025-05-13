@@ -81,8 +81,6 @@ public class TeacherService {
             person.getUser().setRole(roleService.getRoleByName(dto.getPerson().getUser().getRole()));
         }
 
-
-
         personRepository.save(person);
 
         teacher.setCode(dto.getCode());

@@ -20,6 +20,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import pe.getsemani.mikhipu.person.enums.Quarter;
 
+import java.util.HashSet;
 import java.util.Set;
 
 @Entity
@@ -61,7 +62,9 @@ public class Course {
     @JoinTable(name = "course_teacher",
             joinColumns = @JoinColumn(name = "course_id"),
             inverseJoinColumns = @JoinColumn(name = "teacher_id"))
-    private Set<Teacher> teachers;
+    @Builder.Default
+    private Set<Teacher> teachers = new HashSet<>();
+
 
     @ManyToMany
     @JoinTable(name = "course_student",
