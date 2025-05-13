@@ -11,6 +11,7 @@ import pe.getsemani.mikhipu.person.entity.Representative;
 import pe.getsemani.mikhipu.person.entity.Student;
 import pe.getsemani.mikhipu.person.mapper.PersonMapper;
 import pe.getsemani.mikhipu.person.mapper.RepresentativeMapper;
+import pe.getsemani.mikhipu.person.repository.PersonRepository;
 import pe.getsemani.mikhipu.person.repository.RepresentativeRepository;
 import pe.getsemani.mikhipu.person.repository.StudentRepository;
 
@@ -28,23 +29,24 @@ public class RepresentativeService {
     private final StudentRepository studentRepository;
     private final PersonMapper personMapper;
     private final RepresentativeMapper representativeMapper;
+    private final PersonRepository personRepository;
 
     public RepresentativeResponseDTO createRepresentative(RepresentativeCreateDTO dto) {
-
         Representative representative = representativeMapper.fromCreateDto(dto);
 
         Person person = personMapper.fromCreateDto(dto.getPerson());
+        person = personRepository.save(person); // 🔥 persistir primero
         representative.setPerson(person);
 
         if (dto.getStudentIds() != null && !dto.getStudentIds().isEmpty()) {
-            Set<Student> students = new HashSet<>(studentRepository
-                    .findAllById(dto.getStudentIds()));
+            Set<Student> students = new HashSet<>(studentRepository.findAllById(dto.getStudentIds()));
             representative.setStudents(students);
         }
 
         Representative saved = representativeRepository.save(representative);
         return representativeMapper.toDto(saved);
     }
+
 
     public RepresentativeResponseDTO getRepresentativeById(Long id) {
         Representative rep = representativeRepository.findById(id)

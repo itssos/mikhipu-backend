@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+import pe.getsemani.mikhipu.person.dto.ManageRepresentativesDTO;
 import pe.getsemani.mikhipu.person.dto.UploadResponse;
 import pe.getsemani.mikhipu.person.dto.create.StudentCreateDTO;
 import pe.getsemani.mikhipu.person.dto.response.StudentResponseDTO;
@@ -74,5 +75,25 @@ public class StudentController {
     public ResponseEntity<UploadResponse> uploadStudentsFromExcel(@RequestParam("file") MultipartFile file) {
         UploadResponse response = studentService.uploadStudentsFromExcel(file);
         return ResponseEntity.ok(response);
+    }
+
+//    @PreAuthorize("hasAuthority('ASSIGN_REPRESENTATIVES')")
+    @PostMapping("/{studentId}/representatives")
+    public ResponseEntity<Void> assignRepresentatives(
+            @PathVariable Long studentId,
+            @Valid @RequestBody ManageRepresentativesDTO dto
+    ) {
+        studentService.assignRepresentativesToStudent(studentId, dto.getRepresentativeIds());
+        return ResponseEntity.noContent().build();
+    }
+
+//    @PreAuthorize("hasAuthority('REMOVE_REPRESENTATIVES')")
+    @DeleteMapping("/{studentId}/representatives")
+    public ResponseEntity<Void> removeRepresentatives(
+            @PathVariable Long studentId,
+            @Valid @RequestBody ManageRepresentativesDTO dto
+    ) {
+        studentService.removeRepresentativesFromStudent(studentId, dto.getRepresentativeIds());
+        return ResponseEntity.noContent().build();
     }
 }

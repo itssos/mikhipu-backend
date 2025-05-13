@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import pe.getsemani.mikhipu.person.dto.AssignTeachersDTO;
+import pe.getsemani.mikhipu.person.dto.ManageStudentsDTO;
+import pe.getsemani.mikhipu.person.dto.RemoveTeachersDTO;
 import pe.getsemani.mikhipu.person.dto.create.CourseCreateDTO;
 import pe.getsemani.mikhipu.person.dto.response.CourseResponseDTO;
 import pe.getsemani.mikhipu.person.service.CourseService;
@@ -58,12 +60,43 @@ public class CourseController {
     }
 
 //    @PreAuthorize("hasAuthority('ASSIGN_TEACHERS')")
-    @PutMapping("/{courseId}/assign-teachers")
+    @PostMapping("/{courseId}/assign-teachers")
     public ResponseEntity<CourseResponseDTO> assignTeachers(
             @PathVariable Long courseId,
             @Valid @RequestBody AssignTeachersDTO dto
     ) {
         courseService.assignTeachersToCourse(courseId, dto.getMainTeacherCode(), dto.getAuxiliaryTeacherCodes());
         return ResponseEntity.ok(courseService.findById(courseId));
+    }
+
+//    @PreAuthorize("hasAuthority('REMOVE_TEACHERS')")
+    @DeleteMapping("/{courseId}/assign-teachers")
+    public ResponseEntity<CourseResponseDTO> removeTeachers(
+            @PathVariable Long courseId,
+            @Valid @RequestBody RemoveTeachersDTO dto
+    ) {
+        courseService.removeTeachersFromCourse(courseId, dto.getTeacherCodes());
+        return ResponseEntity.ok(courseService.findById(courseId));
+    }
+
+
+    //    @PreAuthorize("hasAuthority('ASSIGN_STUDENTS')")
+    @PostMapping("/{courseId}/students")
+    public ResponseEntity<Void> assignStudents(
+            @PathVariable Long courseId,
+            @Valid @RequestBody ManageStudentsDTO dto
+    ) {
+        courseService.assignStudentsToCourse(courseId, dto.getStudentIds());
+        return ResponseEntity.noContent().build();
+    }
+
+//    @PreAuthorize("hasAuthority('REMOVE_STUDENTS')")
+    @DeleteMapping("/{courseId}/students")
+    public ResponseEntity<Void> removeStudents(
+            @PathVariable Long courseId,
+            @Valid @RequestBody ManageStudentsDTO dto
+    ) {
+        courseService.removeStudentsFromCourse(courseId, dto.getStudentIds());
+        return ResponseEntity.noContent().build();
     }
 }

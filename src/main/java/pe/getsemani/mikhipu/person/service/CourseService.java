@@ -11,6 +11,7 @@ import pe.getsemani.mikhipu.person.entity.Student;
 import pe.getsemani.mikhipu.person.entity.Teacher;
 import pe.getsemani.mikhipu.person.mapper.CourseMapper;
 import pe.getsemani.mikhipu.person.repository.CourseRepository;
+import pe.getsemani.mikhipu.person.repository.CourseStudentRepository;
 import pe.getsemani.mikhipu.person.repository.StudentRepository;
 import pe.getsemani.mikhipu.person.repository.TeacherRepository;
 
@@ -28,6 +29,7 @@ public class CourseService {
     private final TeacherRepository teacherRepository;
     private final StudentRepository studentRepository;
     private final CourseMapper courseMapper;
+    private final CourseStudentRepository courseStudentRepository;
 
     public CourseResponseDTO create(CourseCreateDTO dto) {
         Course course = courseMapper.toEntity(dto);
@@ -86,6 +88,44 @@ public class CourseService {
 
         course.setMainTeacher(mainTeacher);
         courseRepository.save(course);
+    }
+
+    @Transactional
+    public void removeTeachersFromCourse(Long courseId, Set<String> teacherCodes) {
+        Course course = courseRepository.findById(courseId)
+                .orElseThrow(() -> new IllegalArgumentException("Curso no encontrado"));
+
+        Teacher main = course.getMainTeacher();
+        if (main != null && teacherCodes.contains(main.getCode())) {
+            course.setMainTeacher(null);
+        }
+
+        courseStudentRepository.removeTeachersFromCourseByCode(courseId, teacherCodes);
+        courseRepository.save(course);
+    }
+
+
+    @Transactional
+    public void assignStudentsToCourse(Long courseId, Set<Long> studentIds) {
+        Course course = courseRepository.findById(courseId)
+                .orElseThrow(() -> new IllegalArgumentException("Curso no encontrado"));
+
+        Set<Student> students = new HashSet<>(studentRepository.findAllById(studentIds));
+
+        if (course.getStudents() == null) {
+            course.setStudents(new HashSet<>());
+        }
+
+        course.getStudents().addAll(students);
+        courseRepository.save(course);
+    }
+
+    @Transactional
+    public void removeStudentsFromCourse(Long courseId, Set<Long> studentIds) {
+        courseRepository.findById(courseId)
+                .orElseThrow(() -> new IllegalArgumentException("Curso no encontrado"));
+
+        courseStudentRepository.removeStudentsFromCourse(courseId, studentIds);
     }
 
 

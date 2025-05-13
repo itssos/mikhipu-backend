@@ -1,7 +1,6 @@
 package pe.getsemani.mikhipu.person.service;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
@@ -19,14 +18,13 @@ import pe.getsemani.mikhipu.person.mapper.PersonMapper;
 import pe.getsemani.mikhipu.person.mapper.StudentMapper;
 import pe.getsemani.mikhipu.person.repository.RepresentativeRepository;
 import pe.getsemani.mikhipu.person.repository.StudentRepository;
-import pe.getsemani.mikhipu.role.repository.RoleRepository;
-import pe.getsemani.mikhipu.user.repository.UserRepository;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.DateUtil;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import pe.getsemani.mikhipu.person.repository.StudentRepresentativeRepository;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -44,11 +42,9 @@ public class StudentService {
     private final StudentRepository studentRepository;
     private final RepresentativeRepository representativeRepository;
     private final PersonService personService;
-    private final RoleRepository roleRepository;
-    private final UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder;
     private final PersonMapper personMapper;
     private final StudentMapper studentMapper;
+    private final StudentRepresentativeRepository studentRepresentativeRepository;
 
     public StudentResponseDTO createStudent(StudentCreateDTO dto) {
         // Mapear DTO a entidad
@@ -215,5 +211,24 @@ public class StudentService {
             case BOOLEAN -> String.valueOf(cell.getBooleanCellValue());
             default -> "";
         };
+    }
+
+    @Transactional
+    public void assignRepresentativesToStudent(Long studentId, Set<Long> representativeIds) {
+        Student student = studentRepository.findById(studentId)
+                .orElseThrow(() -> new IllegalArgumentException("Estudiante no encontrado"));
+
+        Set<Representative> representatives = new HashSet<>(representativeRepository.findAllById(representativeIds));
+
+        student.getRepresentatives().addAll(representatives);
+        studentRepository.save(student);
+    }
+
+    @Transactional
+    public void removeRepresentativesFromStudent(Long studentId, Set<Long> representativeIds) {
+        studentRepository.findById(studentId)
+                .orElseThrow(() -> new IllegalArgumentException("Estudiante no encontrado"));
+
+        studentRepresentativeRepository.removeRepresentativesFromStudent(studentId, representativeIds);
     }
 }
