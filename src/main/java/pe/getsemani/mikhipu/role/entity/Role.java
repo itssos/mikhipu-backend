@@ -41,8 +41,9 @@ public class Role {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @NotEmpty(message = "El nombre del rol no puede estar vacio.")
-    @NotNull(message = "El nombre del rol no debe ser nulo")
+    @NotNull(message = "El nombre del rol no debe ser nulo.")
+    @NotEmpty(message = "El nombre del rol no puede estar vacío.")
+    @Size(min = 3, max = 50, message = "El nombre del rol debe tener entre 3 y 50 caracteres.")
     @Column(name = "name", length = 50, nullable = false, unique = true)
     private String name;
 
