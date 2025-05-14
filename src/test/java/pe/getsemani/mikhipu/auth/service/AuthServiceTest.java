@@ -47,7 +47,7 @@ class AuthServiceTest {
 
         authService = new AuthService(
                 authenticationManager, tokenProvider, userRepository,
-                personRepository, roleRepository, personMapper
+                personRepository, personMapper
         );
     }
 

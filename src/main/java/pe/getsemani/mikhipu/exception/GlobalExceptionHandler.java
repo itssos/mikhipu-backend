@@ -143,7 +143,7 @@ public class GlobalExceptionHandler {
                 LocalDateTime.now(),
                 HttpStatus.UNAUTHORIZED.value(),
                 HttpStatus.UNAUTHORIZED.getReasonPhrase(),
-                "Authentication failed: " + ex.getMessage(),
+                "Error de autenticación: " + ex.getMessage(),
                 request.getRequestURI(),
                 null
         );
@@ -220,7 +220,7 @@ public class GlobalExceptionHandler {
                 LocalDateTime.now(),
                 HttpStatus.INTERNAL_SERVER_ERROR.value(),
                 HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase(),
-                "An unexpected error occurred: " + ex.getMessage(),
+                "Se produjo un error inesperado:" + ex.getMessage(),
                 request.getRequestURI(),
                 null
         );
