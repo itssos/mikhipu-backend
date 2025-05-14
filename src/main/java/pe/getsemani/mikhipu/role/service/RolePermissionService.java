@@ -1,5 +1,6 @@
 package pe.getsemani.mikhipu.role.service;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import pe.getsemani.mikhipu.exception.ResourceNotFoundException;
@@ -9,15 +10,10 @@ import pe.getsemani.mikhipu.role.repository.PermissionRepository;
 import pe.getsemani.mikhipu.role.repository.RoleRepository;
 
 @Service
+@RequiredArgsConstructor
 public class RolePermissionService {
     private final RoleRepository roleRepo;
     private final PermissionRepository permRepo;
-
-    public RolePermissionService(RoleRepository roleRepo,
-                                 PermissionRepository permRepo) {
-        this.roleRepo = roleRepo;
-        this.permRepo = permRepo;
-    }
 
     @Transactional
     public Role addPermissionToRole(Integer roleId, String permName) {
