@@ -6,12 +6,12 @@ import org.springframework.stereotype.Service;
 import pe.getsemani.mikhipu.person.dto.TeacherScheduleDTO;
 import pe.getsemani.mikhipu.person.dto.response.TeacherCourseScheduleResponseDTO;
 import pe.getsemani.mikhipu.person.entity.Course;
-import pe.getsemani.mikhipu.person.entity.Teacher;
 import pe.getsemani.mikhipu.person.entity.TeacherCourseSchedule;
 import pe.getsemani.mikhipu.person.mapper.TeacherScheduleMapper;
 import pe.getsemani.mikhipu.person.repository.CourseRepository;
 import pe.getsemani.mikhipu.person.repository.TeacherCourseScheduleRepository;
-import pe.getsemani.mikhipu.person.repository.TeacherRepository;
+import pe.getsemani.mikhipu.persons.teacher.entity.Teacher;
+import pe.getsemani.mikhipu.persons.teacher.repository.TeacherRepository;
 
 import java.time.DayOfWeek;
 import java.time.LocalTime;

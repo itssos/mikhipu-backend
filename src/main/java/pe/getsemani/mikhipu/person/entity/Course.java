@@ -19,6 +19,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import pe.getsemani.mikhipu.person.enums.Quarter;
+import pe.getsemani.mikhipu.persons.teacher.entity.Teacher;
 
 import java.util.HashSet;
 import java.util.Set;

@@ -1,13 +1,10 @@
-package pe.getsemani.mikhipu.person.mapper;
+package pe.getsemani.mikhipu.persons.person.mapper;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import pe.getsemani.mikhipu.person.dto.create.PersonCreateDTO;
-import pe.getsemani.mikhipu.person.dto.response.PersonResponseDTO;
-import pe.getsemani.mikhipu.person.entity.Person;
-import pe.getsemani.mikhipu.user.dto.UserCreateDTO;
-import pe.getsemani.mikhipu.user.dto.UserResponseDTO;
-import pe.getsemani.mikhipu.user.entity.User;
+import pe.getsemani.mikhipu.persons.person.dto.PersonCreateDTO;
+import pe.getsemani.mikhipu.persons.person.dto.PersonResponseDTO;
+import pe.getsemani.mikhipu.persons.person.entity.Person;
 import pe.getsemani.mikhipu.user.mapper.UserMapper;
 
 @Component

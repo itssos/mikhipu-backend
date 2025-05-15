@@ -1,10 +1,11 @@
-package pe.getsemani.mikhipu.person.mapper;
+package pe.getsemani.mikhipu.persons.teacher.mapper;
 
 import org.springframework.stereotype.Component;
-import pe.getsemani.mikhipu.person.dto.create.TeacherCreateDTO;
-import pe.getsemani.mikhipu.person.dto.response.TeacherResponseDTO;
-import pe.getsemani.mikhipu.person.entity.Person;
-import pe.getsemani.mikhipu.person.entity.Teacher;
+import pe.getsemani.mikhipu.persons.person.entity.Person;
+import pe.getsemani.mikhipu.persons.person.mapper.PersonMapper;
+import pe.getsemani.mikhipu.persons.teacher.dto.TeacherCreateDTO;
+import pe.getsemani.mikhipu.persons.teacher.dto.TeacherResponseDTO;
+import pe.getsemani.mikhipu.persons.teacher.entity.Teacher;
 
 @Component
 public class TeacherMapper {

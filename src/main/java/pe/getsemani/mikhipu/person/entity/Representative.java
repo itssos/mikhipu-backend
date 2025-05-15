@@ -20,6 +20,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import pe.getsemani.mikhipu.person.enums.RelationshipType;
+import pe.getsemani.mikhipu.persons.person.entity.Person;
 
 import java.util.Set;
 

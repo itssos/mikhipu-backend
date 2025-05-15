@@ -6,7 +6,8 @@ import pe.getsemani.mikhipu.person.dto.create.CourseCreateDTO;
 import pe.getsemani.mikhipu.person.dto.response.CourseResponseDTO;
 import pe.getsemani.mikhipu.person.entity.Course;
 import pe.getsemani.mikhipu.person.entity.Student;
-import pe.getsemani.mikhipu.person.entity.Teacher;
+import pe.getsemani.mikhipu.persons.teacher.entity.Teacher;
+import pe.getsemani.mikhipu.persons.teacher.mapper.TeacherMapper;
 
 import java.util.Set;
 import java.util.stream.Collectors;

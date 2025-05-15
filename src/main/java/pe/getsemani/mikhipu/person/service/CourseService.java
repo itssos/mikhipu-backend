@@ -11,7 +11,7 @@ import pe.getsemani.mikhipu.person.dto.response.StudentCourseViewDTO;
 import pe.getsemani.mikhipu.person.dto.response.StudentResponseDTO;
 import pe.getsemani.mikhipu.person.entity.Course;
 import pe.getsemani.mikhipu.person.entity.Student;
-import pe.getsemani.mikhipu.person.entity.Teacher;
+import pe.getsemani.mikhipu.persons.teacher.entity.Teacher;
 import pe.getsemani.mikhipu.person.enums.SchoolLevel;
 import pe.getsemani.mikhipu.person.enums.Section;
 import pe.getsemani.mikhipu.person.mapper.CourseMapper;
@@ -21,7 +21,7 @@ import pe.getsemani.mikhipu.person.repository.CourseRelationRepositoryImpl;
 import pe.getsemani.mikhipu.person.repository.CourseRepository;
 import pe.getsemani.mikhipu.person.repository.CourseStudentRepository;
 import pe.getsemani.mikhipu.person.repository.StudentRepository;
-import pe.getsemani.mikhipu.person.repository.TeacherRepository;
+import pe.getsemani.mikhipu.persons.teacher.repository.TeacherRepository;
 
 
 import java.util.HashSet;

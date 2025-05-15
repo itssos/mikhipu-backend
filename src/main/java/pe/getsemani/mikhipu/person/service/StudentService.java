@@ -10,15 +10,16 @@ import pe.getsemani.mikhipu.person.dto.basic.RepresentativeBasicDTO;
 import pe.getsemani.mikhipu.person.dto.create.StudentCreateDTO;
 import pe.getsemani.mikhipu.person.dto.response.StudentCourseViewDTO;
 import pe.getsemani.mikhipu.person.dto.response.StudentResponseDTO;
-import pe.getsemani.mikhipu.person.entity.Person;
+import pe.getsemani.mikhipu.persons.person.dto.PersonCreateDTO;
+import pe.getsemani.mikhipu.persons.person.entity.Person;
 import pe.getsemani.mikhipu.person.entity.Representative;
 import pe.getsemani.mikhipu.person.entity.Student;
 import pe.getsemani.mikhipu.person.enums.Gender;
 import pe.getsemani.mikhipu.person.enums.SchoolLevel;
 import pe.getsemani.mikhipu.person.enums.Section;
-import pe.getsemani.mikhipu.person.mapper.PersonMapper;
+import pe.getsemani.mikhipu.persons.person.mapper.PersonMapper;
 import pe.getsemani.mikhipu.person.mapper.StudentMapper;
-import pe.getsemani.mikhipu.person.repository.PersonRepository;
+import pe.getsemani.mikhipu.persons.person.repository.PersonRepository;
 import pe.getsemani.mikhipu.person.repository.RepresentativeRepository;
 import pe.getsemani.mikhipu.person.repository.StudentRepository;
 import org.apache.poi.ss.usermodel.Cell;
@@ -28,6 +29,7 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import pe.getsemani.mikhipu.person.repository.StudentRepresentativeRepository;
+import pe.getsemani.mikhipu.persons.person.service.PersonService;
 import pe.getsemani.mikhipu.user.entity.User;
 import pe.getsemani.mikhipu.user.repository.UserRepository;
 
@@ -216,7 +218,7 @@ public class StudentService {
 
     private StudentCreateDTO parseStudentDtoFromRow(Row row) {
         StudentCreateDTO dto = new StudentCreateDTO();
-        var personDto = new pe.getsemani.mikhipu.person.dto.create.PersonCreateDTO();
+        var personDto = new PersonCreateDTO();
 
         personDto.setFirstName(getCellValue(row.getCell(0)));
         personDto.setLastName(getCellValue(row.getCell(1)));

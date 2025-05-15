@@ -1,9 +1,9 @@
-package pe.getsemani.mikhipu.person.repository;
+package pe.getsemani.mikhipu.persons.person.repository;
 
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
-import pe.getsemani.mikhipu.person.entity.Person;
+import pe.getsemani.mikhipu.persons.person.entity.Person;
 
 @Repository
 public interface PersonRepository extends JpaRepository<Person, Long> {

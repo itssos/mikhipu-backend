@@ -14,10 +14,10 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import pe.getsemani.mikhipu.person.entity.Admin;
-import pe.getsemani.mikhipu.person.entity.Person;
+import pe.getsemani.mikhipu.persons.person.entity.Person;
 import pe.getsemani.mikhipu.person.enums.Gender;
 import pe.getsemani.mikhipu.person.repository.AdminRepository;
-import pe.getsemani.mikhipu.person.repository.PersonRepository;
+import pe.getsemani.mikhipu.persons.person.repository.PersonRepository;
 import pe.getsemani.mikhipu.role.entity.Permission;
 import pe.getsemani.mikhipu.role.entity.Role;
 import pe.getsemani.mikhipu.role.enums.PermissionConstants;
@@ -121,7 +121,6 @@ public class AdminInitializer implements ApplicationRunner {
                 RoleConstants.DOCENTE,       List.of(
                         PermissionConstants.GET_PERSONS,
                         PermissionConstants.GET_PERSON,
-                        PermissionConstants.UPDATE_PERSON,
                         PermissionConstants.GET_ROLES,
                         PermissionConstants.GET_ROLE
                 ),

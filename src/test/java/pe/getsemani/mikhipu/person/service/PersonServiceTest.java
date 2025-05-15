@@ -6,11 +6,12 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import pe.getsemani.mikhipu.person.dto.create.PersonCreateDTO;
-import pe.getsemani.mikhipu.person.dto.response.PersonResponseDTO;
-import pe.getsemani.mikhipu.person.entity.Person;
-import pe.getsemani.mikhipu.person.mapper.PersonMapper;
-import pe.getsemani.mikhipu.person.repository.PersonRepository;
+import pe.getsemani.mikhipu.persons.person.dto.PersonCreateDTO;
+import pe.getsemani.mikhipu.persons.person.dto.PersonResponseDTO;
+import pe.getsemani.mikhipu.persons.person.entity.Person;
+import pe.getsemani.mikhipu.persons.person.mapper.PersonMapper;
+import pe.getsemani.mikhipu.persons.person.repository.PersonRepository;
+import pe.getsemani.mikhipu.persons.person.service.PersonService;
 
 import java.util.Arrays;
 import java.util.List;

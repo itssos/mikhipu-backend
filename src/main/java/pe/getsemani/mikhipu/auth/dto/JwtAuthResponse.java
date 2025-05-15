@@ -4,7 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import pe.getsemani.mikhipu.person.dto.response.PersonResponseDTO;
+import pe.getsemani.mikhipu.persons.person.dto.PersonResponseDTO;
 
 @Data
 @AllArgsConstructor

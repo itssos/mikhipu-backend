@@ -9,14 +9,14 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import pe.getsemani.mikhipu.exception.ResourceNotFoundException;
 import pe.getsemani.mikhipu.person.dto.create.RepresentativeCreateDTO;
-import pe.getsemani.mikhipu.person.dto.create.PersonCreateDTO;
+import pe.getsemani.mikhipu.persons.person.dto.PersonCreateDTO;
 import pe.getsemani.mikhipu.person.dto.response.RepresentativeResponseDTO;
-import pe.getsemani.mikhipu.person.entity.Person;
+import pe.getsemani.mikhipu.persons.person.entity.Person;
 import pe.getsemani.mikhipu.person.entity.Representative;
 import pe.getsemani.mikhipu.person.entity.Student;
-import pe.getsemani.mikhipu.person.mapper.PersonMapper;
+import pe.getsemani.mikhipu.persons.person.mapper.PersonMapper;
 import pe.getsemani.mikhipu.person.mapper.RepresentativeMapper;
-import pe.getsemani.mikhipu.person.repository.PersonRepository;
+import pe.getsemani.mikhipu.persons.person.repository.PersonRepository;
 import pe.getsemani.mikhipu.person.repository.RepresentativeRepository;
 import pe.getsemani.mikhipu.person.repository.StudentRepository;
 

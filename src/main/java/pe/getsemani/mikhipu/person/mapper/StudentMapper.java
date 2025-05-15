@@ -8,10 +8,7 @@ import pe.getsemani.mikhipu.person.dto.response.StudentCourseViewDTO;
 import pe.getsemani.mikhipu.person.dto.response.StudentResponseDTO;
 import pe.getsemani.mikhipu.person.entity.Representative;
 import pe.getsemani.mikhipu.person.entity.Student;
-
-import java.util.HashSet;
-import java.util.Set;
-import java.util.stream.Collectors;
+import pe.getsemani.mikhipu.persons.person.mapper.PersonMapper;
 
 @Component
 public class StudentMapper {
