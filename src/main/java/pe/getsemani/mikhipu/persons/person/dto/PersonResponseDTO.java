@@ -2,7 +2,7 @@ package pe.getsemani.mikhipu.persons.person.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
-import pe.getsemani.mikhipu.person.enums.Gender;
+import pe.getsemani.mikhipu.persons.person.enums.Gender;
 import pe.getsemani.mikhipu.user.dto.UserResponseDTO;
 
 import java.time.LocalDate;

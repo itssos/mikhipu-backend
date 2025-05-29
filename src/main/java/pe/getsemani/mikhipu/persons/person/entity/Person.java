@@ -21,7 +21,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import pe.getsemani.mikhipu.person.enums.Gender;
+import pe.getsemani.mikhipu.persons.person.enums.Gender;
 import pe.getsemani.mikhipu.user.entity.User;
 import java.time.LocalDate;
 

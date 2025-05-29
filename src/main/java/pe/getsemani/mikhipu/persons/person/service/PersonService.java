@@ -51,6 +51,18 @@ public class PersonService {
     }
 
     /**
+     * Guarda una entidad Person directamente en la base de datos, sin validaciones ni lógica adicional.
+     * Útil para casos internos (importaciones, migraciones, etc).
+     *
+     * @param person Entidad Person a guardar (debe estar correctamente construida).
+     * @return PersonResponseDTO con los datos guardados.
+     */
+    public Person saveRaw(Person person) {
+        return personRepository.save(person);
+    }
+
+
+    /**
      * Obtiene una persona por ID.
      */
     public PersonResponseDTO getById(Long id) {

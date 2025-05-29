@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import pe.getsemani.mikhipu.person.dto.response.StudentResponseDTO;
+import pe.getsemani.mikhipu.persons.student.dto.StudentResponseDTO;
 import pe.getsemani.mikhipu.persons.teacher.dto.TeacherCreateDTO;
 import pe.getsemani.mikhipu.persons.teacher.dto.TeacherResponseDTO;
 import pe.getsemani.mikhipu.persons.teacher.service.TeacherService;

@@ -13,10 +13,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import pe.getsemani.mikhipu.person.entity.Admin;
+import pe.getsemani.mikhipu.persons.admin.Admin;
 import pe.getsemani.mikhipu.persons.person.entity.Person;
-import pe.getsemani.mikhipu.person.enums.Gender;
-import pe.getsemani.mikhipu.person.repository.AdminRepository;
+import pe.getsemani.mikhipu.persons.person.enums.Gender;
+import pe.getsemani.mikhipu.persons.admin.AdminRepository;
 import pe.getsemani.mikhipu.persons.person.repository.PersonRepository;
 import pe.getsemani.mikhipu.role.entity.Permission;
 import pe.getsemani.mikhipu.role.entity.Role;

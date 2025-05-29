@@ -17,7 +17,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import pe.getsemani.mikhipu.person.entity.Course;
+import pe.getsemani.mikhipu.course.entity.Course;
 import pe.getsemani.mikhipu.persons.person.entity.Person;
 
 import java.util.Set;
