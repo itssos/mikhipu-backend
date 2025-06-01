@@ -37,7 +37,6 @@ public class AssistanceSession {
     public static final String COLUMN_START_EXIT = "start_exit_time";
     public static final String COLUMN_END_EXIT = "end_exit_time";
     public static final String COLUMN_DEADLINE = "attendance_deadline";
-    public static final String COLUMN_CREATED_BY = "created_by";
 
     // === Atributos ===
 

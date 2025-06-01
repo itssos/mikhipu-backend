@@ -41,8 +41,6 @@ public class AssistanceRecord {
     public static final String COLUMN_ENTRY_STATUS = "entry_status";
     public static final String COLUMN_EXIT_TIME = "exit_marked_at";
     public static final String COLUMN_EXIT_STATUS = "exit_status";
-    public static final String COLUMN_EDITED = "edited";
-    public static final String COLUMN_EDITOR_ID = "editor_id";
 
     // === Atributos ===
 
@@ -74,8 +72,5 @@ public class AssistanceRecord {
     @Enumerated(EnumType.STRING)
     @Column(name = COLUMN_EXIT_STATUS)
     private AssistanceExitStatus exitStatus;
-
-    @Column(name = COLUMN_EDITED, nullable = false)
-    private Boolean edited = false;
 
 }
