@@ -31,7 +31,6 @@ public class AssistanceSession {
     public static final String TABLE_NAME = "assistance_sessions";
 
     public static final String COLUMN_ID = "id";
-    public static final String COLUMN_DATE = "date";
     public static final String COLUMN_START_ENTRY = "start_entry_time";
     public static final String COLUMN_END_ENTRY = "end_entry_time";
     public static final String COLUMN_START_EXIT = "start_exit_time";
@@ -44,10 +43,6 @@ public class AssistanceSession {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = COLUMN_ID)
     private Long id;
-
-    @NotNull(message = "La fecha de sesión es obligatoria.")
-    @Column(name = COLUMN_DATE, nullable = false)
-    private LocalDate date;
 
     @NotNull(message = "La hora de inicio de entrada es obligatoria.")
     @Column(name = COLUMN_START_ENTRY, nullable = false)
@@ -69,5 +64,7 @@ public class AssistanceSession {
     @Future(message = "La fecha límite debe ser en el futuro.")
     @Column(name = COLUMN_DEADLINE, nullable = false)
     private LocalDateTime attendanceDeadline;
+
+    private Boolean active = true;
 
 }

@@ -11,11 +11,4 @@ public class AssistanceRecordCreateDTO {
     @NotNull
     private Long studentId;
 
-    @Schema(description = "ID de la sesión del día", example = "10", required = true)
-    @NotNull
-    private Long sessionId;
-
-    @Schema(description = "Tipo de marca (entrada o salida)", example = "entrada", required = true, allowableValues = {"entrada", "salida"})
-    @NotNull
-    private String type;
 }

@@ -20,6 +20,7 @@ import pe.getsemani.mikhipu.assistance.enums.AssistanceEntryStatus;
 import pe.getsemani.mikhipu.assistance.enums.AssistanceExitStatus;
 import pe.getsemani.mikhipu.persons.student.entity.Student;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
@@ -35,7 +36,7 @@ public class AssistanceRecord {
     public static final String TABLE_NAME = "assistance_records";
 
     public static final String COLUMN_ID = "id";
-    public static final String COLUMN_SESSION_ID = "session_id";
+    public static final String COLUMN_DATE = "date";
     public static final String COLUMN_STUDENT_ID = "student_id";
     public static final String COLUMN_ENTRY_TIME = "entry_marked_at";
     public static final String COLUMN_ENTRY_STATUS = "entry_status";
@@ -49,15 +50,14 @@ public class AssistanceRecord {
     @Column(name = COLUMN_ID)
     private Long id;
 
-    @NotNull(message = "La sesión de asistencia es obligatoria.")
-    @ManyToOne
-    @JoinColumn(name = COLUMN_SESSION_ID, nullable = false)
-    private AssistanceSession session;
-
     @NotNull(message = "El alumno es obligatorio.")
     @ManyToOne
     @JoinColumn(name = COLUMN_STUDENT_ID, nullable = false)
     private Student student;
+
+    @NotNull(message = "La fecha de sesión es obligatoria.")
+    @Column(name = COLUMN_DATE, nullable = false)
+    private LocalDate date;
 
     @Column(name = COLUMN_ENTRY_TIME)
     private LocalDateTime entryMarkedAt;
@@ -72,5 +72,7 @@ public class AssistanceRecord {
     @Enumerated(EnumType.STRING)
     @Column(name = COLUMN_EXIT_STATUS)
     private AssistanceExitStatus exitStatus;
+
+    private Boolean edited = false;
 
 }

@@ -5,6 +5,7 @@ import lombok.Data;
 import pe.getsemani.mikhipu.assistance.enums.AssistanceEntryStatus;
 import pe.getsemani.mikhipu.assistance.enums.AssistanceExitStatus;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Data
@@ -16,8 +17,8 @@ public class AssistanceRecordResponseDTO {
     @Schema(description = "ID del estudiante", example = "123")
     private Long studentId;
 
-    @Schema(description = "ID de la sesión", example = "10")
-    private Long sessionId;
+    @Schema(description = "Fecha de la asistencia", example = "2025-06-01")
+    private LocalDate date;
 
     @Schema(description = "Hora registrada de entrada", example = "2025-06-01T08:10:00")
     private LocalDateTime entryMarkedAt;
@@ -30,5 +31,8 @@ public class AssistanceRecordResponseDTO {
 
     @Schema(description = "Estado de la salida", example = "SALIDA_REGULAR")
     private AssistanceExitStatus exitStatus;
+
+    @Schema(description = "Indica si el registro fue editado manualmente", example = "false")
+    private Boolean edited;
 
 }
