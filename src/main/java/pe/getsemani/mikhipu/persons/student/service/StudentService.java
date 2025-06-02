@@ -113,6 +113,14 @@ public class StudentService {
         return studentMapper.toDto(student);
     }
 
+    public String getStudentFirstNameById(Long id){
+        return findStudentById(id).getPerson().getFirstName();
+    }
+
+    public String getStudentLastNameById(Long id){
+        return findStudentById(id).getPerson().getLastName();
+    }
+
     public List<StudentCourseViewDTO> getAllStudents() {
         return studentRepository.findAll()
                 .stream()

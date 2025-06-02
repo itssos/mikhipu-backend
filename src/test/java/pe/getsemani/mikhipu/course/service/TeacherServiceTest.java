@@ -18,6 +18,7 @@ import pe.getsemani.mikhipu.course.mapper.TeacherMapper;
 import pe.getsemani.mikhipu.course.repository.CourseRepository;
 import pe.getsemani.mikhipu.persons.person.repository.PersonRepository;
 import pe.getsemani.mikhipu.course.repository.TeacherRepository;
+import pe.getsemani.mikhipu.persons.teacher.dto.TeacherResponseDTO;
 import pe.getsemani.mikhipu.persons.teacher.service.TeacherService;
 import pe.getsemani.mikhipu.role.entity.Role;
 import pe.getsemani.mikhipu.role.enums.RoleType;
