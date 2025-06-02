@@ -4,16 +4,15 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import pe.getsemani.mikhipu.assistance.entity.AssistanceSession;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
 @Repository
 public interface AssistanceSessionRepository extends JpaRepository<AssistanceSession, Long> {
 
-    Optional<AssistanceSession> findByDate(LocalDate date);
+    List<AssistanceSession> findByAttendanceDeadlineAfter(LocalDateTime now);
 
-    List<AssistanceSession> findByDateBetween(LocalDate startDate, LocalDate endDate);
+    Optional<AssistanceSession> findByActiveTrue();
 
-    boolean existsByDate(LocalDate date);
 }
