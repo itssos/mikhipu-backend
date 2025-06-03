@@ -8,6 +8,9 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springdoc.core.annotations.ParameterObject;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -28,17 +31,20 @@ public class AssistanceReportController {
     private final AssistanceReportService reportService;
 
     @Operation(
-            summary = "Obtener estadísticas de asistencia",
+            summary = "Obtener estadísticas de asistencia paginadas",
             responses = {
                     @ApiResponse(responseCode = "200", description = "Estadísticas generadas",
                             content = @Content(schema = @Schema(implementation = AssistanceStatisticsDTO.class)))
             }
     )
     @GetMapping("/statistics")
-    public ResponseEntity<List<AssistanceStatisticsDTO>> getStatistics(@Valid AssistanceReportFilterDTO filter) {
-        List<AssistanceStatisticsDTO> result = reportService.getStatistics(filter);
-        return ResponseEntity.ok(result);
+    public Page<AssistanceStatisticsDTO> getStatistics(
+            @ParameterObject AssistanceReportFilterDTO filter,
+            @ParameterObject Pageable pageable
+    ) {
+        return reportService.getStatistics(filter, pageable);
     }
+
 
     @Operation(
             summary = "Exportar registros de asistencia a Excel",
@@ -47,7 +53,7 @@ public class AssistanceReportController {
             }
     )
     @GetMapping(value = "/export/excel", produces = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
-    public ResponseEntity<byte[]> exportExcel(@Valid AssistanceReportFilterDTO filter) {
+    public ResponseEntity<byte[]> exportExcel(@ParameterObject AssistanceReportFilterDTO filter) {
         byte[] excel = reportService.exportToExcel(filter);
         return ResponseEntity.ok()
                 .header("Content-Disposition", "attachment; filename=asistencias.xlsx")
@@ -61,7 +67,7 @@ public class AssistanceReportController {
             }
     )
     @GetMapping(value = "/export/pdf", produces = MediaType.APPLICATION_PDF_VALUE)
-    public ResponseEntity<byte[]> exportPdf(@Valid AssistanceReportFilterDTO filter) {
+    public ResponseEntity<byte[]> exportPdf(@ParameterObject AssistanceReportFilterDTO filter) {
         byte[] pdf = reportService.exportToPdf(filter);
         return ResponseEntity.ok()
                 .header("Content-Disposition", "attachment; filename=asistencias.pdf")

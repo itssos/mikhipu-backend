@@ -3,6 +3,8 @@ package pe.getsemani.mikhipu.assistance.service;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import pe.getsemani.mikhipu.assistance.dto.AssistanceRecordCreateDTO;
 import pe.getsemani.mikhipu.assistance.dto.AssistanceRecordResponseDTO;
@@ -137,10 +139,10 @@ public class AssistanceRecordService {
     }
 
 
-    public List<AssistanceRecordResponseDTO> getRecordsByFilter(AssistanceReportFilterDTO filter) {
-        return recordRepository.findAll(AssistanceRecordSpecification.buildFromFilter(filter)).stream()
-                .map(recordMapper::toResponseDto)
-                .toList();
+    public Page<AssistanceRecordResponseDTO> getRecordsByFilter(AssistanceReportFilterDTO filter, Pageable pageable) {
+        return recordRepository.findAll(
+                AssistanceRecordSpecification.buildFromFilter(filter), pageable
+        ).map(recordMapper::toResponseDto);
     }
 
     // Marca ausentes a todos los alumnos que no marcaron entrada en la fecha

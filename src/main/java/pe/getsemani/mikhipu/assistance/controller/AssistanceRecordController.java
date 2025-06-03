@@ -9,6 +9,9 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springdoc.core.annotations.ParameterObject;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -90,9 +93,10 @@ public class AssistanceRecordController {
             }
     )
     @GetMapping
-    public ResponseEntity<List<AssistanceRecordResponseDTO>> getRecordsByFilter(
-            @Valid AssistanceReportFilterDTO filter) {
-        List<AssistanceRecordResponseDTO> result = recordService.getRecordsByFilter(filter);
-        return ResponseEntity.ok(result);
+    public Page<AssistanceRecordResponseDTO> getRecordsByFilter(
+            @ParameterObject AssistanceReportFilterDTO filter,
+            @ParameterObject Pageable pageable
+    ) {
+        return recordService.getRecordsByFilter(filter, pageable);
     }
 }

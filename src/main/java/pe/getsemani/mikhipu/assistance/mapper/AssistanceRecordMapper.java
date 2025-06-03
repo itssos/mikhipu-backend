@@ -23,12 +23,17 @@ public class AssistanceRecordMapper {
         AssistanceRecordResponseDTO dto = new AssistanceRecordResponseDTO();
         dto.setId(entity.getId());
         dto.setStudentId(entity.getStudent().getId());
+        dto.setFirstName(entity.getStudent().getPerson().getFirstName());
+        dto.setLastName(entity.getStudent().getPerson().getLastName());
         dto.setDate(entity.getDate());
         dto.setEntryMarkedAt(entity.getEntryMarkedAt());
         dto.setEntryStatus(entity.getEntryStatus());
         dto.setExitMarkedAt(entity.getExitMarkedAt());
         dto.setExitStatus(entity.getExitStatus());
         dto.setEdited(entity.getEdited());
+        dto.setGrade(entity.getStudent().getGrade());
+        dto.setSection(entity.getStudent().getSection());
+        dto.setSchoolLevel(entity.getStudent().getSchoolLevel());
         return dto;
     }
 }

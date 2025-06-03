@@ -4,6 +4,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import pe.getsemani.mikhipu.assistance.enums.AssistanceEntryStatus;
 import pe.getsemani.mikhipu.assistance.enums.AssistanceExitStatus;
+import pe.getsemani.mikhipu.persons.student.enums.SchoolLevel;
+import pe.getsemani.mikhipu.persons.student.enums.Section;
 
 import java.time.LocalDate;
 
@@ -24,4 +26,16 @@ public class AssistanceReportFilterDTO {
 
     @Schema(description = "Fecha de fin del rango (inclusive)", example = "2025-06-30")
     private LocalDate endDate;
+
+    @Schema(description = "Grado del estudiante", example = "1")
+    private Integer grade;
+
+    @Schema(description = "Seccion del estudiante", example = "A")
+    private Section section;
+
+    @Schema(description = "Nivel del estudiante", example = "PRIMARIA")
+    private SchoolLevel schoolLevel;
+
+    @Schema(description = "ID del curso", example = "5")
+    private Long courseId;
 }

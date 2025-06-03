@@ -60,30 +60,30 @@ public interface AssistanceRecordRepository extends JpaRepository<AssistanceReco
     /**
      * Estadísticas agregadas por estados para un estudiante dentro de un rango de fechas.
      */
-    @Query("""
-    SELECT new pe.getsemani.mikhipu.assistance.dto.AssistanceStatisticsDTO(
-            s.id,
-            CONCAT(p.firstName, ' ', p.lastName),
-            COUNT(r),
-            SUM(CASE WHEN r.entryStatus = 'PRESENTE' THEN 1 ELSE 0 END),
-            SUM(CASE WHEN r.entryStatus = 'TARDANZA' THEN 1 ELSE 0 END),
-            SUM(CASE WHEN r.entryStatus = 'AUSENTE' THEN 1 ELSE 0 END),
-            SUM(CASE WHEN r.exitStatus = 'SALIDA_REGULAR' THEN 1 ELSE 0 END),
-            SUM(CASE WHEN r.exitStatus = 'SALIDA_ANTICIPADA' THEN 1 ELSE 0 END),
-            ROUND(
-                (SUM(CASE WHEN r.entryStatus = 'PRESENTE' OR r.entryStatus = 'TARDANZA' THEN 1.0 ELSE 0 END) * 100.0) /
-                COUNT(r),
-                2
-            )
-        )
-        FROM AssistanceRecord r
-        JOIN r.student s
-        JOIN s.person p
-        WHERE (:studentId IS NULL OR s.id = :studentId)
-          AND (:startDate IS NULL OR r.date >= :startDate)
-          AND (:endDate IS NULL OR r.date <= :endDate)
-        GROUP BY s.id, p.firstName, p.lastName
-    """)
-    List<AssistanceStatisticsDTO> getStatistics(Long studentId, LocalDate startDate, LocalDate endDate);
+//    @Query("""
+//    SELECT new pe.getsemani.mikhipu.assistance.dto.AssistanceStatisticsDTO(
+//            s.id,
+//            CONCAT(p.firstName, ' ', p.lastName),
+//            COUNT(r),
+//            SUM(CASE WHEN r.entryStatus = 'PRESENTE' THEN 1 ELSE 0 END),
+//            SUM(CASE WHEN r.entryStatus = 'TARDANZA' THEN 1 ELSE 0 END),
+//            SUM(CASE WHEN r.entryStatus = 'AUSENTE' THEN 1 ELSE 0 END),
+//            SUM(CASE WHEN r.exitStatus = 'SALIDA_REGULAR' THEN 1 ELSE 0 END),
+//            SUM(CASE WHEN r.exitStatus = 'SALIDA_ANTICIPADA' THEN 1 ELSE 0 END),
+//            ROUND(
+//                (SUM(CASE WHEN r.entryStatus = 'PRESENTE' OR r.entryStatus = 'TARDANZA' THEN 1.0 ELSE 0 END) * 100.0) /
+//                COUNT(r),
+//                2
+//            )
+//        )
+//        FROM AssistanceRecord r
+//        JOIN r.student s
+//        JOIN s.person p
+//        WHERE (:studentId IS NULL OR s.id = :studentId)
+//          AND (:startDate IS NULL OR r.date >= :startDate)
+//          AND (:endDate IS NULL OR r.date <= :endDate)
+//        GROUP BY s.id, p.firstName, p.lastName
+//    """)
+//    List<AssistanceStatisticsDTO> getStatistics(Long studentId, LocalDate startDate, LocalDate endDate);
 
 }

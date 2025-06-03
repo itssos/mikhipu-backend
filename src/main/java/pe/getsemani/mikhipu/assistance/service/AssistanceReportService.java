@@ -2,19 +2,29 @@ package pe.getsemani.mikhipu.assistance.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import pe.getsemani.mikhipu.assistance.dto.AssistanceRecordExportDTO;
 import pe.getsemani.mikhipu.assistance.dto.AssistanceRecordResponseDTO;
 import pe.getsemani.mikhipu.assistance.dto.AssistanceReportFilterDTO;
 import pe.getsemani.mikhipu.assistance.dto.AssistanceStatisticsDTO;
+import pe.getsemani.mikhipu.assistance.entity.AssistanceRecord;
+import pe.getsemani.mikhipu.assistance.enums.AssistanceEntryStatus;
+import pe.getsemani.mikhipu.assistance.enums.AssistanceExitStatus;
 import pe.getsemani.mikhipu.assistance.mapper.AssistanceRecordMapper;
 import pe.getsemani.mikhipu.assistance.repository.AssistanceRecordRepository;
 import pe.getsemani.mikhipu.assistance.specification.AssistanceRecordSpecification;
+import pe.getsemani.mikhipu.assistance.specification.AssistanceRecordStatisticsSpecification;
 import pe.getsemani.mikhipu.persons.student.service.StudentService;
 import pe.getsemani.mikhipu.util.ExportUtil; // <-- tu nuevo util general
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -37,13 +47,56 @@ public class AssistanceReportService {
     /**
      * Estadísticas por alumno o rango de alumnos.
      */
-    public List<AssistanceStatisticsDTO> getStatistics(AssistanceReportFilterDTO filter) {
-        return recordRepository.getStatistics(
-                filter.getStudentId(),
-                filter.getStartDate(),
-                filter.getEndDate()
+    public Page<AssistanceStatisticsDTO> getStatistics(AssistanceReportFilterDTO filter, Pageable pageable) {
+        // 1. Sin paginación aquí
+        List<AssistanceRecord> records = recordRepository.findAll(
+                AssistanceRecordStatisticsSpecification.buildFromFilter(filter)
         );
+
+        // 2. Agrupa por estudiante
+        Map<Long, AssistanceStatisticsDTO> statsMap = new LinkedHashMap<>();
+        for (AssistanceRecord record : records) {
+            Long studentId = record.getStudent().getId();
+            String fullName = record.getStudent().getPerson().getFirstName() + " " +
+                    record.getStudent().getPerson().getLastName();
+
+            AssistanceStatisticsDTO dto = statsMap.getOrDefault(studentId,
+                    new AssistanceStatisticsDTO(studentId, fullName, 0L, 0L, 0L, 0L, 0L, 0L, 0.0)
+            );
+
+            dto.setTotalSessions(dto.getTotalSessions() + 1);
+            if (record.getEntryStatus() == AssistanceEntryStatus.PRESENTE)
+                dto.setPresentes(dto.getPresentes() + 1);
+            if (record.getEntryStatus() == AssistanceEntryStatus.TARDANZA)
+                dto.setTardanzas(dto.getTardanzas() + 1);
+            if (record.getEntryStatus() == AssistanceEntryStatus.AUSENTE)
+                dto.setAusencias(dto.getAusencias() + 1);
+            if (record.getExitStatus() == AssistanceExitStatus.SALIDA_REGULAR)
+                dto.setSalidasRegulares(dto.getSalidasRegulares() + 1);
+            if (record.getExitStatus() == AssistanceExitStatus.SALIDA_ANTICIPADA)
+                dto.setSalidasAnticipadas(dto.getSalidasAnticipadas() + 1);
+
+            statsMap.put(studentId, dto);
+        }
+
+        // 3. Calcula el porcentaje de asistencia
+        statsMap.values().forEach(dto -> {
+            Long total = dto.getTotalSessions();
+            Long presentes = dto.getPresentes();
+            Long tardanzas = dto.getTardanzas();
+            dto.setPorcentajeAsistencia(total == 0 ? 0.0 :
+                    Math.round(((presentes + tardanzas) * 100.0 / total) * 100.0) / 100.0);
+        });
+
+        // 4. Paginación sobre los estudiantes agrupados
+        List<AssistanceStatisticsDTO> dtoList = new ArrayList<>(statsMap.values());
+        int start = (int) pageable.getOffset();
+        int end = Math.min((start + pageable.getPageSize()), dtoList.size());
+        List<AssistanceStatisticsDTO> pageContent = dtoList.subList(start, end);
+
+        return new PageImpl<>(pageContent, pageable, dtoList.size());
     }
+
 
     /**
      * Exportar registros filtrados a Excel.
