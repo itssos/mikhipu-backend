@@ -8,11 +8,13 @@ import pe.getsemani.mikhipu.assistance.dto.AssistanceRecordCreateDTO;
 import pe.getsemani.mikhipu.assistance.dto.AssistanceRecordResponseDTO;
 import pe.getsemani.mikhipu.assistance.dto.AssistanceRecordUpdateDTO;
 import pe.getsemani.mikhipu.assistance.dto.AssistanceReportFilterDTO;
+import pe.getsemani.mikhipu.assistance.dto.AssistanceSessionResponseDTO;
 import pe.getsemani.mikhipu.assistance.entity.AssistanceRecord;
 import pe.getsemani.mikhipu.assistance.entity.AssistanceSession;
 import pe.getsemani.mikhipu.assistance.enums.AssistanceEntryStatus;
 import pe.getsemani.mikhipu.assistance.enums.AssistanceExitStatus;
 import pe.getsemani.mikhipu.assistance.mapper.AssistanceRecordMapper;
+import pe.getsemani.mikhipu.assistance.mapper.AssistanceSessionMapper;
 import pe.getsemani.mikhipu.assistance.repository.AssistanceRecordRepository;
 import pe.getsemani.mikhipu.assistance.repository.AssistanceSessionRepository;
 import pe.getsemani.mikhipu.assistance.specification.AssistanceRecordSpecification;
@@ -32,15 +34,34 @@ public class AssistanceRecordService {
     private final AssistanceSessionRepository sessionRepository;
     private final StudentRepository studentRepository;
     private final AssistanceRecordMapper recordMapper;
+    private final AssistanceSessionService assistanceSessionService;
+    private final AssistanceSessionMapper assistanceSessionMapper;
+
 
     // Registra la entrada para un estudiante en la fecha actual
     @Transactional
     public AssistanceRecordResponseDTO registerEntry(AssistanceRecordCreateDTO dto) {
-        AssistanceSession config = sessionRepository.findByActiveTrue()
-                .orElseThrow(() -> new IllegalStateException("No existe configuración de asistencia activa."));
+        AssistanceSessionResponseDTO config = assistanceSessionService.getActiveSessions();
 
-        if (config.getAttendanceDeadline() != null && LocalDateTime.now().isAfter(config.getAttendanceDeadline())) {
+        LocalTime nowTime = LocalTime.now();
+        LocalDateTime nowDateTime = LocalDateTime.now();
+
+        // Validación DEADLINE
+        if (config.getAttendanceDeadline() != null && nowDateTime.isAfter(config.getAttendanceDeadline())) {
             throw new IllegalStateException("El plazo para registrar asistencia ha expirado.");
+        }
+
+        // Antes de startEntryTime: no permitido
+        if (nowTime.isBefore(config.getStartEntryTime())) {
+            throw new IllegalArgumentException("No puedes marcar entrada antes del horario permitido.");
+        }
+
+        // Después de endEntryTime pero antes de startExitTime: TARDANZA permitida
+        boolean isTardanza = nowTime.isAfter(config.getEndEntryTime()) && nowTime.isBefore(config.getStartExitTime());
+
+        // Después del startExitTime: no permitido
+        if (nowTime.isAfter(config.getStartExitTime()) || nowTime.equals(config.getStartExitTime())) {
+            throw new IllegalArgumentException("Ya no puedes marcar entrada, el horario ha finalizado.");
         }
 
         LocalDate today = LocalDate.now();
@@ -50,9 +71,15 @@ public class AssistanceRecordService {
                         .date(today)
                         .build());
 
-        LocalDateTime now = LocalDateTime.now();
-        record.setEntryMarkedAt(now);
-        record.setEntryStatus(getEntryStatus(now.toLocalTime(), config));
+        record.setEntryMarkedAt(nowDateTime);
+
+        // Determina el estado según la hora
+        if (nowTime.isAfter(config.getEndEntryTime()) && nowTime.isBefore(config.getStartExitTime())) {
+            record.setEntryStatus(AssistanceEntryStatus.TARDANZA);
+        } else {
+            record.setEntryStatus(AssistanceEntryStatus.PRESENTE);
+        }
+
         recordRepository.save(record);
 
         return recordMapper.toResponseDto(record);
@@ -61,16 +88,25 @@ public class AssistanceRecordService {
     // Registra la salida para un estudiante en la fecha actual
     @Transactional
     public AssistanceRecordResponseDTO registerExit(AssistanceRecordCreateDTO dto) {
+        AssistanceSessionResponseDTO config = assistanceSessionService.getActiveSessions();
+
+        LocalTime nowTime = LocalTime.now();
+        LocalDateTime nowDateTime = LocalDateTime.now();
+
+        // Validación de horario de salida
+        if (nowTime.isBefore(config.getStartExitTime())) {
+            throw new IllegalArgumentException("No puedes marcar salida antes del horario permitido.");
+        }
+        if (nowTime.isAfter(config.getEndExitTime())) {
+            throw new IllegalArgumentException("No puedes marcar salida, ya pasó el horario permitido.");
+        }
+
         LocalDate today = LocalDate.now();
         AssistanceRecord record = recordRepository.findByStudentIdAndDate(dto.getStudentId(), today)
                 .orElseThrow(() -> new IllegalArgumentException("No se encontró un registro de entrada para este alumno."));
 
-        AssistanceSession config = sessionRepository.findByActiveTrue()
-                .orElseThrow(() -> new IllegalStateException("No existe configuración de asistencia activa."));
-
-        LocalDateTime now = LocalDateTime.now();
-        record.setExitMarkedAt(now);
-        record.setExitStatus(getExitStatus(now.toLocalTime(), config));
+        record.setExitMarkedAt(nowDateTime);
+        record.setExitStatus(getExitStatus(nowTime, assistanceSessionMapper.fromResponseDto(config)));
         recordRepository.save(record);
 
         return recordMapper.toResponseDto(record);

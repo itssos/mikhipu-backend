@@ -22,6 +22,18 @@ public class AssistanceSessionMapper {
                 .build();
     }
 
+    public AssistanceSession fromResponseDto(AssistanceSessionResponseDTO dto) {
+        return AssistanceSession.builder()
+                .id(dto.getId())
+                .startEntryTime(dto.getStartEntryTime())
+                .endEntryTime(dto.getEndEntryTime())
+                .startExitTime(dto.getStartExitTime())
+                .endExitTime(dto.getEndExitTime())
+                .attendanceDeadline(dto.getAttendanceDeadline())
+                .active(dto.getActive() != null ? dto.getActive() : Boolean.TRUE)
+                .build();
+    }
+
     public AssistanceSessionResponseDTO toResponseDto(AssistanceSession entity) {
         AssistanceSessionResponseDTO dto = new AssistanceSessionResponseDTO();
         dto.setId(entity.getId());
