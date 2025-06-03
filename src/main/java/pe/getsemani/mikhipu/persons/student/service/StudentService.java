@@ -1,6 +1,8 @@
 package pe.getsemani.mikhipu.persons.student.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
@@ -9,6 +11,7 @@ import pe.getsemani.mikhipu.course.dto.UploadResponse;
 import pe.getsemani.mikhipu.persons.representative.dto.RepresentativeBasicDTO;
 import pe.getsemani.mikhipu.persons.student.dto.StudentCreateDTO;
 import pe.getsemani.mikhipu.persons.student.dto.StudentCourseViewDTO;
+import pe.getsemani.mikhipu.persons.student.dto.StudentFilterDTO;
 import pe.getsemani.mikhipu.persons.student.dto.StudentResponseDTO;
 import pe.getsemani.mikhipu.persons.person.dto.PersonCreateDTO;
 import pe.getsemani.mikhipu.persons.person.entity.Person;
@@ -30,6 +33,7 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import pe.getsemani.mikhipu.persons.student.repository.StudentRepresentativeRepository;
 import pe.getsemani.mikhipu.persons.person.service.PersonService;
+import pe.getsemani.mikhipu.persons.student.specification.StudentSpecification;
 import pe.getsemani.mikhipu.user.entity.User;
 import pe.getsemani.mikhipu.user.repository.UserRepository;
 
@@ -128,20 +132,18 @@ public class StudentService {
                 .collect(Collectors.toList());
     }
 
-    public List<StudentCourseViewDTO> getAllStudentsFiltered(String dni, String name) {
-        return studentRepository.findByOptionalFilters(dni, name)
-                .stream()
-                .map(proj -> {
+    public Page<StudentCourseViewDTO> getAllStudentsFiltered(StudentFilterDTO filter, Pageable pageable) {
+        return studentRepository.findAll(StudentSpecification.build(filter), pageable)
+                .map(student -> {
                     StudentCourseViewDTO dto = new StudentCourseViewDTO();
-                    dto.setId(proj.getId());
-                    dto.setFullName(proj.getFullName());
-                    dto.setDni(proj.getDni());
-                    dto.setGrade(proj.getGrade());
-                    dto.setSection(Section.valueOf(proj.getSection()));
-                    dto.setSchoolLevel(SchoolLevel.valueOf(proj.getSchoolLevel()));
+                    dto.setId(student.getId());
+                    dto.setFullName(student.getPerson().getFirstName() + " " + student.getPerson().getLastName());
+                    dto.setDni(student.getPerson().getDni());
+                    dto.setGrade(student.getGrade());
+                    dto.setSection(student.getSection());
+                    dto.setSchoolLevel(student.getSchoolLevel());
                     return dto;
-                })
-                .toList();
+                });
     }
 
     @Transactional

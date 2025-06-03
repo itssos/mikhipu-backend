@@ -1,7 +1,13 @@
 package pe.getsemani.mikhipu.persons.student.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springdoc.core.annotations.ParameterObject;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -20,6 +26,7 @@ import pe.getsemani.mikhipu.course.dto.UploadResponse;
 import pe.getsemani.mikhipu.persons.representative.dto.RepresentativeBasicDTO;
 import pe.getsemani.mikhipu.persons.student.dto.StudentCreateDTO;
 import pe.getsemani.mikhipu.persons.student.dto.StudentCourseViewDTO;
+import pe.getsemani.mikhipu.persons.student.dto.StudentFilterDTO;
 import pe.getsemani.mikhipu.persons.student.dto.StudentResponseDTO;
 import pe.getsemani.mikhipu.persons.student.service.StudentService;
 
@@ -32,13 +39,16 @@ public class StudentController {
 
     private final StudentService studentService;
 
+    @Operation(summary = "Obtiene lista paginada y filtrada de estudiantes")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Listado paginado de estudiantes")
+    })
     @GetMapping
     @PreAuthorize("hasAuthority('GET_STUDENTS')")
-    public ResponseEntity<List<StudentCourseViewDTO>> getAllStudents(
-            @RequestParam(required = false) String dni,
-            @RequestParam(required = false) String name
-    ) {
-        return ResponseEntity.ok(studentService.getAllStudentsFiltered(dni, name));
+    public ResponseEntity<Page<StudentCourseViewDTO>> getAllStudents(
+            @ParameterObject StudentFilterDTO filter,
+            @ParameterObject Pageable pageable) {
+        return ResponseEntity.ok(studentService.getAllStudentsFiltered(filter, pageable));
     }
 
     @GetMapping("/{id}")
