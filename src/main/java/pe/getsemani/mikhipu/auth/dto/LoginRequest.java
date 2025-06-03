@@ -7,11 +7,11 @@ import lombok.Data;
 @Data
 public class LoginRequest {
 
-    @Schema(description = "Nombre de usuario o correo electrónico del usuario", example = "usuario123", required = true)
+    @Schema(description = "Nombre de usuario o correo electrónico del usuario", example = "admin", required = true)
     @NotBlank(message = "El nombre de usuario no puede estar vacío.")
     private String username;
 
-    @Schema(description = "Contraseña del usuario", example = "S3guraP@ss", required = true)
+    @Schema(description = "Contraseña del usuario", example = "1234", required = true)
     @NotBlank(message = "La contraseña no puede estar vacía.")
     private String password;
 }
