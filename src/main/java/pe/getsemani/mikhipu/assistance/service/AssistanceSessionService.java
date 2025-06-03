@@ -41,6 +41,33 @@ public class AssistanceSessionService {
         AssistanceSession session = sessionRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("No existe la configuración de asistencia con id: " + id));
 
+        // === Validaciones de consistencia horaria ===
+
+        // Entrada: inicio < fin
+        if (dto.getStartEntryTime().compareTo(dto.getEndEntryTime()) >= 0) {
+            throw new IllegalArgumentException("La hora de inicio de entrada debe ser menor que la hora de fin de entrada.");
+        }
+        // Salida: inicio < fin
+        if (dto.getStartExitTime().compareTo(dto.getEndExitTime()) >= 0) {
+            throw new IllegalArgumentException("La hora de inicio de salida debe ser menor que la hora de fin de salida.");
+        }
+        // La entrada debe terminar antes de que inicie la salida
+        if (dto.getEndEntryTime().compareTo(dto.getStartExitTime()) > 0) {
+            throw new IllegalArgumentException("La hora de fin de entrada debe ser menor o igual que la hora de inicio de salida.");
+        }
+        // El rango de entrada no debe traslapar el rango de salida
+        if (dto.getEndEntryTime().compareTo(dto.getEndExitTime()) > 0) {
+            throw new IllegalArgumentException("La hora de fin de entrada no puede ser mayor que la hora de fin de salida.");
+        }
+        if (dto.getStartEntryTime().compareTo(dto.getEndExitTime()) > 0) {
+            throw new IllegalArgumentException("La hora de inicio de entrada no puede ser mayor que la hora de fin de salida.");
+        }
+        // No permitir que algún rango esté completamente fuera de los demás (opcional)
+        if (dto.getStartExitTime().compareTo(dto.getEndEntryTime()) < 0) {
+            throw new IllegalArgumentException("La hora de inicio de salida no puede ser menor que la hora de fin de entrada.");
+        }
+
+        // ==== Si esta correcto, aplicar ====
         session.setStartEntryTime(dto.getStartEntryTime());
         session.setEndEntryTime(dto.getEndEntryTime());
         session.setStartExitTime(dto.getStartExitTime());
