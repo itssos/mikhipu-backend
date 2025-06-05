@@ -44,7 +44,7 @@ class PasswordResetControllerTest {
                         .content(payload)
                         .with(csrf()))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.fieldErrors.email").value("Email is required"));
+                .andExpect(jsonPath("$.fieldErrors.email").value("El correo electrónico no puede estar vacío."));
     }
 
     @Test
@@ -59,7 +59,7 @@ class PasswordResetControllerTest {
                         .content(objectMapper.writeValueAsString(req))
                         .with(csrf()))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.fieldErrors.email").value("Email should be valid"));
+                .andExpect(jsonPath("$.fieldErrors.email").value("Debe proporcionar un correo electrónico válido."));
     }
 
     @Test
@@ -67,17 +67,17 @@ class PasswordResetControllerTest {
     @WithMockUser
     void resetPassword_missingToken_returns400() throws Exception {
         String payload = """
-            {
-              "newPassword": "newPassword"
-            }
-            """;
+        {
+          "newPassword": "newPassword"
+        }
+        """;
 
         mockMvc.perform(post("/api/auth/reset-password")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(payload)
                         .with(csrf()))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.fieldErrors.token").value("Token is required"));
+                .andExpect(jsonPath("$.fieldErrors.token").value("El token de recuperación no puede estar vacío."));
     }
 
     @Test
@@ -85,17 +85,17 @@ class PasswordResetControllerTest {
     @WithMockUser
     void resetPassword_missingPassword_returns400() throws Exception {
         String payload = """
-            {
-              "token": "tok123"
-            }
-            """;
+        {
+          "token": "tok123"
+        }
+        """;
 
         mockMvc.perform(post("/api/auth/reset-password")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(payload)
                         .with(csrf()))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.fieldErrors.newPassword").value("New password is required"));
+                .andExpect(jsonPath("$.fieldErrors.newPassword").value("La nueva contraseña no puede estar vacía."));
     }
 
     @Test
@@ -111,6 +111,6 @@ class PasswordResetControllerTest {
                         .content(objectMapper.writeValueAsString(req))
                         .with(csrf()))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.fieldErrors.newPassword").value("Password must be at least 8 characters"));
+                .andExpect(jsonPath("$.fieldErrors.newPassword").value("La contraseña debe tener entre 8 y 255 caracteres."));
     }
 }

@@ -32,7 +32,6 @@ class RoleServiceTest {
     @BeforeEach
     void setUp() {
         role = new Role();
-        role.setId(1);
         role.setName("DOCENTE");
         role.setDescription("Docente rol");
     }

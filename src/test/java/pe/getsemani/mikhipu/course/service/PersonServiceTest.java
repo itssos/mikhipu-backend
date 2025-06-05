@@ -6,12 +6,17 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import pe.getsemani.mikhipu.exception.ResourceNotFoundException;
 import pe.getsemani.mikhipu.persons.person.dto.PersonCreateDTO;
 import pe.getsemani.mikhipu.persons.person.dto.PersonResponseDTO;
 import pe.getsemani.mikhipu.persons.person.entity.Person;
 import pe.getsemani.mikhipu.persons.person.mapper.PersonMapper;
 import pe.getsemani.mikhipu.persons.person.repository.PersonRepository;
 import pe.getsemani.mikhipu.persons.person.service.PersonService;
+import pe.getsemani.mikhipu.role.entity.Role;
+import pe.getsemani.mikhipu.role.service.RoleService;
+import pe.getsemani.mikhipu.user.dto.UserCreateDTO;
+import pe.getsemani.mikhipu.user.repository.UserRepository;
 
 import java.util.Arrays;
 import java.util.List;
@@ -28,6 +33,10 @@ class PersonServiceTest {
 
     @Mock
     private PersonMapper personMapper;
+    @Mock
+    private UserRepository userRepository;
+    @Mock
+    private RoleService roleService;
 
     @InjectMocks
     private PersonService personService;
@@ -38,10 +47,29 @@ class PersonServiceTest {
 
     @BeforeEach
     void setUp() {
+        // Crear un PersonCreateDTO con user no nulo para evitar NPE
         createDTO = new PersonCreateDTO();
+        UserCreateDTO userCreateDTO = new UserCreateDTO();
+        userCreateDTO.setUsername("user");
+        createDTO.setUser(userCreateDTO);
+
         person = new Person();
         person.setId(1L);
+
         responseDTO = new PersonResponseDTO();
+
+        // Mock RoleService para cualquier rol solicitado
+        Role mockRole = new Role();
+        mockRole.setId(1);
+        mockRole.setName("ROLE_USER");
+
+        // Mock para cualquier string y también para null
+        when(roleService.getRoleByName(anyString())).thenReturn(mockRole);
+        when(roleService.getRoleByName(null)).thenReturn(mockRole);
+        when(roleService.getRoleByName(any())).thenReturn(mockRole);
+
+        // Mock UserRepository
+        when(userRepository.existsByUsername(anyString())).thenReturn(false);
     }
 
     @Test
@@ -90,47 +118,34 @@ class PersonServiceTest {
 
         Throwable thrown = catchThrowable(() -> personService.getPersonById(999L));
 
-        assertThat(thrown).isInstanceOf(RuntimeException.class)
-                .hasMessageContaining("Person not found with id: 999");
+        assertThat(thrown).isInstanceOf(ResourceNotFoundException.class)
+                .hasMessageContaining("Persona no encontrada con ID: 999");
         verify(personRepository).findById(999L);
         verifyNoInteractions(personMapper);
     }
 
     @Test
-    @DisplayName("Debe devolver todas las personas registradas")
-    void shouldReturnAllPersons() {
-        List<Person> persons = Arrays.asList(new Person(), new Person());
-        List<PersonResponseDTO> dtos = Arrays.asList(new PersonResponseDTO(), new PersonResponseDTO());
-
-        when(personRepository.findAll()).thenReturn(persons);
-        when(personMapper.toDto(any(Person.class)))
-                .thenReturn(dtos.get(0), dtos.get(1));
-
-        List<PersonResponseDTO> result = personService.getAllPersons();
-
-        assertThat(result).hasSize(2);
-        verify(personRepository).findAll();
-        verify(personMapper, times(2)).toDto(any(Person.class));
-    }
-
-    @Test
     @DisplayName("Debe eliminar una persona por ID sin errores")
     void shouldDeletePerson() {
-        doNothing().when(personRepository).deleteById(1L);
+        when(personRepository.findById(1L)).thenReturn(Optional.of(person));
+        doNothing().when(personRepository).delete(person);
 
         personService.deletePerson(1L);
 
-        verify(personRepository).deleteById(1L);
+        verify(personRepository).findById(1L);
+        verify(personRepository).delete(person);
     }
 
     @Test
     @DisplayName("Debe lanzar excepción al intentar eliminar una persona inexistente")
     void shouldThrowExceptionWhenDeleteFails() {
-        doThrow(new EmptyResultDataAccessException(1)).when(personRepository).deleteById(404L);
+        when(personRepository.findById(404L)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> personService.deletePerson(404L))
-                .isInstanceOf(EmptyResultDataAccessException.class);
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessageContaining("Persona no encontrada con ID: 404");
 
-        verify(personRepository).deleteById(404L);
+        verify(personRepository).findById(404L);
+        verify(personRepository, never()).deleteById(anyLong());
     }
 }

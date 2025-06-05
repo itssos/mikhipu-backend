@@ -42,7 +42,7 @@ public class AuthService {
 
         Optional<Person> personOptional = personRepository.findByUserUsername(request.getUsername());
         PersonResponseDTO personResponseDTO = personOptional
-                .map(personMapper::toDto)     // ahora llamamos al método de instancia
+                .map(personMapper::toDto)
                 .orElse(null);
 
         return new JwtAuthResponse(jwt, TOKEN_TYPE, personResponseDTO);

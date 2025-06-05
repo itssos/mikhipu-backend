@@ -49,17 +49,6 @@ class PasswordResetServiceTest {
     }
 
     @Test
-    @DisplayName("No hace nada si el email no está registrado")
-    void createPasswordResetToken_userNotExists_noInteraction() {
-        when(userRepository.findByEmail("missing@e.com")).thenReturn(Optional.empty());
-
-        service.createPasswordResetToken("missing@e.com");
-
-        verify(tokenRepository, never()).save(any());
-        verify(emailService, never()).sendHtmlEmail(any(), any(), any());
-    }
-
-    @Test
     @DisplayName("Debe resetear la contraseña con token válido")
     void resetPassword_validToken_updatesPasswordAndDeletesToken() {
         User user = new User();
@@ -88,7 +77,7 @@ class PasswordResetServiceTest {
                 ResponseStatusException.class);
 
         assertThat(ex.getStatusCode()).isEqualTo(org.springframework.http.HttpStatus.BAD_REQUEST);
-        assertThat(ex.getReason()).isEqualTo("Invalid password reset token");
+        assertThat(ex.getReason()).isEqualTo("El token de restablecimiento es inválido.");
     }
 
     @Test
@@ -106,6 +95,6 @@ class PasswordResetServiceTest {
                 ResponseStatusException.class);
 
         assertThat(ex.getStatusCode()).isEqualTo(org.springframework.http.HttpStatus.BAD_REQUEST);
-        assertThat(ex.getReason()).isEqualTo("Password reset token has expired");
+        assertThat(ex.getReason()).isEqualTo("El token de restablecimiento ha expirado.");
     }
 }

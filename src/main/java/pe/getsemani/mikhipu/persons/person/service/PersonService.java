@@ -65,7 +65,7 @@ public class PersonService {
     /**
      * Obtiene una persona por ID.
      */
-    public PersonResponseDTO getById(Long id) {
+    public PersonResponseDTO getPersonById(Long id) {
         Person person = personRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Persona no encontrada con ID: " + id));
         return personMapper.toDto(person);
@@ -74,7 +74,7 @@ public class PersonService {
     /**
      * Elimina una persona por ID (y su usuario asociado, por cascade).
      */
-    public void deleteById(Long id) {
+    public void deletePerson(Long id) {
         Person person = personRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Persona no encontrada con ID: " + id));
         personRepository.delete(person);

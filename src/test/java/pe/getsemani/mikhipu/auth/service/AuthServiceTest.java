@@ -93,7 +93,7 @@ class AuthServiceTest {
                 authService.authenticate(loginRequest));
 
         assertEquals(HttpStatus.NOT_FOUND, ex.getStatusCode());
-        assertTrue(ex.getReason().contains("User not found"));
+        assertTrue(ex.getReason().contains("Usuario no encontrado."));
     }
 
     @Test

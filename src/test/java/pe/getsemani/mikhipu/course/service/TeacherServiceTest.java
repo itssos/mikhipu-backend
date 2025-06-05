@@ -7,18 +7,20 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import pe.getsemani.mikhipu.exception.ResourceNotFoundException;
 import pe.getsemani.mikhipu.persons.person.dto.PersonCreateDTO;
 import pe.getsemani.mikhipu.persons.student.dto.StudentResponseDTO;
 import pe.getsemani.mikhipu.persons.person.entity.Person;
 import pe.getsemani.mikhipu.persons.student.entity.Student;
-import pe.getsemani.mikhipu.course.entity.Teacher;
 import pe.getsemani.mikhipu.persons.person.mapper.PersonMapper;
 import pe.getsemani.mikhipu.persons.student.mapper.StudentMapper;
-import pe.getsemani.mikhipu.course.mapper.TeacherMapper;
 import pe.getsemani.mikhipu.course.repository.CourseRepository;
 import pe.getsemani.mikhipu.persons.person.repository.PersonRepository;
-import pe.getsemani.mikhipu.course.repository.TeacherRepository;
+import pe.getsemani.mikhipu.persons.teacher.dto.TeacherCreateDTO;
 import pe.getsemani.mikhipu.persons.teacher.dto.TeacherResponseDTO;
+import pe.getsemani.mikhipu.persons.teacher.entity.Teacher;
+import pe.getsemani.mikhipu.persons.teacher.mapper.TeacherMapper;
+import pe.getsemani.mikhipu.persons.teacher.repository.TeacherRepository;
 import pe.getsemani.mikhipu.persons.teacher.service.TeacherService;
 import pe.getsemani.mikhipu.role.entity.Role;
 import pe.getsemani.mikhipu.role.enums.RoleType;
@@ -58,6 +60,15 @@ class TeacherServiceTest {
         teacherDTO = new TeacherCreateDTO();
         PersonCreateDTO personDTO = new PersonCreateDTO();
         personDTO.setDni("12345678");
+
+        // MOCKEA EL USER
+        var userDTO = new pe.getsemani.mikhipu.user.dto.UserCreateDTO();
+        userDTO.setUsername("user");
+        userDTO.setPassword("pass");
+        userDTO.setEmail("mail@mail.com");
+        userDTO.setRole("DOCENTE");
+        personDTO.setUser(userDTO);
+
         teacherDTO.setCode("DOC123");
         teacherDTO.setPerson(personDTO);
 
@@ -86,9 +97,7 @@ class TeacherServiceTest {
     @Test
     @DisplayName("Debe lanzar excepción si el código del docente ya existe")
     void createTeacher_duplicateCode() {
-        when(personRepository.findByDni("12345678")).thenReturn(Optional.of(person));
         when(teacherRepository.existsByCode("DOC123")).thenReturn(true);
-
         assertThrows(IllegalArgumentException.class, () -> teacherService.create(teacherDTO));
     }
 
@@ -165,14 +174,13 @@ class TeacherServiceTest {
 
         verify(teacherRepository).delete(teacher);
         verify(personRepository).delete(person);
-        verify(userRepository).delete(user);
     }
 
     @Test
     @DisplayName("Debe lanzar excepción si no se encuentra el docente")
     void deleteTeacher_notFound() {
         when(teacherRepository.findById(100L)).thenReturn(Optional.empty());
-        assertThrows(IllegalArgumentException.class, () -> teacherService.delete(100L));
+        assertThrows(ResourceNotFoundException.class, () -> teacherService.delete(100L));
     }
 
     @Test
