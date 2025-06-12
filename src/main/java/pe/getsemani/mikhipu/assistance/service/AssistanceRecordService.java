@@ -159,13 +159,13 @@ public class AssistanceRecordService {
     }
 
     // PRIVATE (No endpoint)
-    private AssistanceEntryStatus getEntryStatus(LocalTime time, AssistanceSession config) {
+    public AssistanceEntryStatus getEntryStatus(LocalTime time, AssistanceSession config) {
         if (time.isBefore(config.getStartEntryTime())) return AssistanceEntryStatus.NO_MARCADA;
         if (!time.isAfter(config.getEndEntryTime())) return AssistanceEntryStatus.PRESENTE;
         return AssistanceEntryStatus.TARDANZA;
     }
 
-    private AssistanceExitStatus getExitStatus(LocalTime time, AssistanceSession config) {
+    public AssistanceExitStatus getExitStatus(LocalTime time, AssistanceSession config) {
         if (time.isBefore(config.getStartExitTime())) return AssistanceExitStatus.SALIDA_ANTICIPADA;
         if (time.isAfter(config.getEndExitTime())) return AssistanceExitStatus.NO_MARCADA;
         return AssistanceExitStatus.SALIDA_REGULAR;
