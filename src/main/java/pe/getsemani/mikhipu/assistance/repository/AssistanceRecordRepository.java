@@ -1,8 +1,10 @@
 package pe.getsemani.mikhipu.assistance.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import pe.getsemani.mikhipu.assistance.dto.AssistanceRecordExportDTO;
 import pe.getsemani.mikhipu.assistance.dto.AssistanceStatisticsDTO;
@@ -28,6 +30,10 @@ public interface AssistanceRecordRepository extends JpaRepository<AssistanceReco
     List<AssistanceRecord> findByExitStatus(AssistanceExitStatus exitStatus);
 
     List<AssistanceRecord> findByDate(LocalDate date);
+
+    @Modifying
+    @Query("DELETE FROM AssistanceRecord ar WHERE ar.student.id = :studentId")
+    void deleteByStudentId(@Param("studentId") Long studentId);
 
     @Query("""
         SELECT 

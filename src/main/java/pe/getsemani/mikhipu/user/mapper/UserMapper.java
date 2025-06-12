@@ -1,6 +1,8 @@
 package pe.getsemani.mikhipu.user.mapper;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import pe.getsemani.mikhipu.role.entity.Permission;
 import pe.getsemani.mikhipu.role.entity.Role;
@@ -12,14 +14,11 @@ import pe.getsemani.mikhipu.user.entity.User;
 import java.util.stream.Collectors;
 
 @Component
+@RequiredArgsConstructor
 public class UserMapper {
 
     private final RoleService roleService;
-
-    @Autowired
-    public UserMapper(RoleService roleService) {
-        this.roleService = roleService;
-    }
+    private final PasswordEncoder passwordEncoder;
 
     public UserResponseDTO toDto(User user) {
         if (user == null) return null;
@@ -46,7 +45,7 @@ public class UserMapper {
         User user = new User();
         user.setUsername(dto.getUsername());
         user.setEmail(dto.getEmail());
-        user.setPassword(dto.getPassword());
+        user.setPassword(passwordEncoder.encode(dto.getPassword()));
 
         if (dto.getRole() != null) {
             Role role = roleService.getRoleByName(dto.getRole());
