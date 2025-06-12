@@ -11,6 +11,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -39,17 +40,18 @@ public class StudentController {
 
     private final StudentService studentService;
 
-    @Operation(summary = "Obtiene lista paginada y filtrada de estudiantes")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Listado paginado de estudiantes")
-    })
     @GetMapping
     @PreAuthorize("hasAuthority('GET_STUDENTS')")
+    @Operation(summary = "Obtiene lista paginada y filtrada de estudiantes")
     public ResponseEntity<Page<StudentCourseViewDTO>> getAllStudents(
             @ParameterObject StudentFilterDTO filter,
-            @ParameterObject Pageable pageable) {
-        return ResponseEntity.ok(studentService.getAllStudentsFiltered(filter, pageable));
+            @ParameterObject Pageable pageable,
+            Authentication authentication
+    ) {
+        String username = authentication.getName();
+        return ResponseEntity.ok(studentService.getAllStudentsFiltered(filter, pageable, username));
     }
+
 
     @GetMapping("/{id}")
     @PreAuthorize("hasAuthority('GET_STUDENT')")

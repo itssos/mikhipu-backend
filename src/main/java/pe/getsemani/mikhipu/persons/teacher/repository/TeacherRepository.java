@@ -15,4 +15,6 @@ public interface TeacherRepository extends JpaRepository<Teacher, Long> {
     Optional<Teacher> findByCode(String code);
 
     List<Teacher> findAllByCodeIn(Set<String> codes);
+
+    Optional<Teacher> findByPerson_User_Username(String username);
 }

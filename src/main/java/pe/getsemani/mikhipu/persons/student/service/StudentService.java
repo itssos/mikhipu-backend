@@ -2,12 +2,17 @@ package pe.getsemani.mikhipu.persons.student.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
 import org.springframework.web.multipart.MultipartFile;
+import pe.getsemani.mikhipu.assistance.repository.AssistanceRecordRepository;
 import pe.getsemani.mikhipu.course.dto.UploadResponse;
+import pe.getsemani.mikhipu.course.entity.Course;
+import pe.getsemani.mikhipu.course.repository.CourseRepository;
 import pe.getsemani.mikhipu.persons.representative.dto.RepresentativeBasicDTO;
 import pe.getsemani.mikhipu.persons.student.dto.StudentCreateDTO;
 import pe.getsemani.mikhipu.persons.student.dto.StudentCourseViewDTO;
@@ -34,6 +39,8 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import pe.getsemani.mikhipu.persons.student.repository.StudentRepresentativeRepository;
 import pe.getsemani.mikhipu.persons.person.service.PersonService;
 import pe.getsemani.mikhipu.persons.student.specification.StudentSpecification;
+import pe.getsemani.mikhipu.persons.teacher.entity.Teacher;
+import pe.getsemani.mikhipu.persons.teacher.repository.TeacherRepository;
 import pe.getsemani.mikhipu.user.entity.User;
 import pe.getsemani.mikhipu.user.repository.UserRepository;
 
@@ -42,6 +49,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -58,6 +66,9 @@ public class StudentService {
     private final StudentRepresentativeRepository studentRepresentativeRepository;
     private final UserRepository userRepository;
     private final PersonRepository personRepository;
+    private final AssistanceRecordRepository assistanceRecordRepository;
+    private final TeacherRepository teacherRepository;
+    private final CourseRepository courseRepository;
 
     public StudentResponseDTO createStudent(StudentCreateDTO dto) {
         // Mapear DTO a entidad
@@ -117,50 +128,122 @@ public class StudentService {
         return studentMapper.toDto(student);
     }
 
-    public String getStudentFirstNameById(Long id){
-        return findStudentById(id).getPerson().getFirstName();
-    }
+    public Page<StudentCourseViewDTO> getAllStudentsFiltered(
+            StudentFilterDTO filter, Pageable pageable, String username
+    ) {
+        // 1. Si es estudiante: solo a sí mismo
+        Optional<Student> studentOpt = studentRepository.findByPerson_User_Username(username);
+        if (studentOpt.isPresent()) {
+            Student student = studentOpt.get();
+            StudentCourseViewDTO dto = studentMapper.toCourseViewDto(student);
+            return new PageImpl<>(List.of(dto), pageable, 1);
+        }
 
-    public String getStudentLastNameById(Long id){
-        return findStudentById(id).getPerson().getLastName();
-    }
+        // 2. Si es docente: solo sus alumnos (de sus cursos como mainTeacher o en teachers)
+        Optional<Teacher> teacherOpt = teacherRepository.findByPerson_User_Username(username);
+        if (teacherOpt.isPresent()) {
+            Teacher teacher = teacherOpt.get();
 
-    public List<StudentCourseViewDTO> getAllStudents() {
-        return studentRepository.findAll()
-                .stream()
-                .map(studentMapper::toCourseViewDto)
-                .collect(Collectors.toList());
-    }
+            // Buscar cursos donde es mainTeacher o en teachers
+            Set<Course> coursesAsTeacher = new HashSet<>();
+            // MainTeacher
+            coursesAsTeacher.addAll(courseRepository.findByMainTeacher_Id(teacher.getId()));
+            // Participa como teacher
+            coursesAsTeacher.addAll(courseRepository.findByTeachers_Id(teacher.getId()));
 
-    public Page<StudentCourseViewDTO> getAllStudentsFiltered(StudentFilterDTO filter, Pageable pageable) {
+            // Si el filtro incluye un courseId, solo ese curso si pertenece al docente
+            if (filter.getCourseId() != null) {
+                coursesAsTeacher.removeIf(c -> !c.getId().equals(filter.getCourseId()));
+            }
+
+            // Unir todos los estudiantes de esos cursos
+            Set<Student> students = coursesAsTeacher.stream()
+                    .flatMap(course -> course.getStudents().stream())
+                    .collect(Collectors.toSet());
+
+            // Aplicar filtros en memoria sobre la colección (ya que no hay mapeo directo en entidad)
+            List<StudentCourseViewDTO> filtered = students.stream()
+                    .filter(student -> {
+                        boolean matches = true;
+                        if (filter.getDni() != null && !student.getPerson().getDni().equals(filter.getDni())) matches = false;
+                        if (filter.getName() != null) {
+                            String name = (student.getPerson().getFirstName() + " " + student.getPerson().getLastName()).toLowerCase();
+                            if (!name.contains(filter.getName().toLowerCase())) matches = false;
+                        }
+                        if (filter.getGrade() != null && !student.getGrade().equals(filter.getGrade())) matches = false;
+                        if (filter.getSection() != null && !student.getSection().name().equalsIgnoreCase(filter.getSection())) matches = false;
+                        if (filter.getSchoolLevel() != null && !student.getSchoolLevel().name().equalsIgnoreCase(filter.getSchoolLevel())) matches = false;
+                        return matches;
+                    })
+                    .map(studentMapper::toCourseViewDto)
+                    .toList();
+
+            // Paginar manualmente (ya que no es query JPA)
+            int start = (int) pageable.getOffset();
+            int end = Math.min(start + pageable.getPageSize(), filtered.size());
+            List<StudentCourseViewDTO> pageContent = (start < end) ? filtered.subList(start, end) : List.of();
+
+            return new PageImpl<>(pageContent, pageable, filtered.size());
+        }
+
+        // 3. Si es representante: solo sus estudiantes
+        Optional<Representative> repOpt = representativeRepository.findByPerson_User_Username(username);
+        if (repOpt.isPresent()) {
+            Representative rep = repOpt.get();
+            Set<Student> students = rep.getStudents();
+
+            List<StudentCourseViewDTO> filtered = students.stream()
+                    .filter(student -> {
+                        boolean matches = true;
+                        if (filter.getCourseId() != null) {
+                            // ¿El estudiante pertenece a ese curso? (consultando cursos)
+                            boolean inCourse = courseRepository.existsByIdAndStudents_Id(filter.getCourseId(), student.getId());
+                            if (!inCourse) matches = false;
+                        }
+                        if (filter.getDni() != null && !student.getPerson().getDni().equals(filter.getDni())) matches = false;
+                        if (filter.getName() != null) {
+                            String name = (student.getPerson().getFirstName() + " " + student.getPerson().getLastName()).toLowerCase();
+                            if (!name.contains(filter.getName().toLowerCase())) matches = false;
+                        }
+                        if (filter.getGrade() != null && !student.getGrade().equals(filter.getGrade())) matches = false;
+                        if (filter.getSection() != null && !student.getSection().name().equalsIgnoreCase(filter.getSection())) matches = false;
+                        if (filter.getSchoolLevel() != null && !student.getSchoolLevel().name().equalsIgnoreCase(filter.getSchoolLevel())) matches = false;
+                        return matches;
+                    })
+                    .map(studentMapper::toCourseViewDto)
+                    .toList();
+
+            // Paginar manualmente
+            int start = (int) pageable.getOffset();
+            int end = Math.min(start + pageable.getPageSize(), filtered.size());
+            List<StudentCourseViewDTO> pageContent = (start < end) ? filtered.subList(start, end) : List.of();
+
+            return new PageImpl<>(pageContent, pageable, filtered.size());
+        }
+
+        // 4. Para admin/otros: consulta general JPA con filters
         return studentRepository.findAll(StudentSpecification.build(filter), pageable)
-                .map(student -> {
-                    StudentCourseViewDTO dto = new StudentCourseViewDTO();
-                    dto.setId(student.getId());
-                    dto.setFullName(student.getPerson().getFirstName() + " " + student.getPerson().getLastName());
-                    dto.setDni(student.getPerson().getDni());
-                    dto.setGrade(student.getGrade());
-                    dto.setSection(student.getSection());
-                    dto.setSchoolLevel(student.getSchoolLevel());
-                    return dto;
-                });
+                .map(studentMapper::toCourseViewDto);
     }
+
 
     @Transactional
     public void deleteStudent(Long id) {
         Student student = studentRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Estudiante no encontrado"));
 
+        // Elimina los registros de asistencia de este estudiante
+        assistanceRecordRepository.deleteByStudentId(id);
+
         Person person = student.getPerson();
         User user = person.getUser();
 
         studentRepository.delete(student);
+        personRepository.delete(person);
         if (user != null) {
             userRepository.delete(user);
         }
-        personRepository.delete(person);
     }
-
 
     protected Student findStudentById(Long id) {
         return studentRepository.findById(id)

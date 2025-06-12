@@ -10,6 +10,7 @@ import pe.getsemani.mikhipu.persons.student.entity.Student;
 
 import java.lang.ScopedValue;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface StudentRepository extends JpaRepository<Student, Long>, JpaSpecificationExecutor<Student> {
@@ -38,6 +39,8 @@ public interface StudentRepository extends JpaRepository<Student, Long>, JpaSpec
       AND (:name IS NULL OR CONCAT(p.first_name, ' ', p.last_name) ILIKE %:name%)
     """, nativeQuery = true)
     List<StudentCourseViewProjection> findByOptionalFilters(@Param("dni") String dni, @Param("name") String name);
+
+    Optional<Student> findByPerson_User_Username(String username);
 
 
 }

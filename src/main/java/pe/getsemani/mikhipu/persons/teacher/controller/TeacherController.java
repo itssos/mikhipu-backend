@@ -11,6 +11,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -46,14 +47,15 @@ public class TeacherController {
         return ResponseEntity.ok(teacherService.create(dto));
     }
 
-    @Operation(summary = "Obtener todos los docentes", description = "Lista todos los docentes registrados en el sistema.")
+    @Operation(summary = "Obtener todos los docentes", description = "Lista todos los docentes registrados en el sistema, filtrados según el usuario autenticado.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Lista obtenida exitosamente", content = @Content)
     })
     @PreAuthorize("hasAuthority('GET_TEACHERS')")
     @GetMapping
-    public ResponseEntity<List<TeacherResponseDTO>> findAll() {
-        return ResponseEntity.ok(teacherService.findAll());
+    public ResponseEntity<List<TeacherResponseDTO>> findAll(Authentication authentication) {
+        String username = authentication.getName();
+        return ResponseEntity.ok(teacherService.findAll(username));
     }
 
     @Operation(summary = "Obtener docente por ID", description = "Busca un docente mediante su ID.")
