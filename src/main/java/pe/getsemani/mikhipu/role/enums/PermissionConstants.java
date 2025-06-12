@@ -57,7 +57,18 @@ public enum PermissionConstants {
     UPDATE_TEACHER("UPDATE_TEACHER", "Actualizar docente"),
     UPLOAD_STUDENT_EXCEL("UPLOAD_STUDENT_EXCEL", "Subir estudiantes por Excel"),
     UPLOAD_STUDENT_LIST("UPLOAD_STUDENT_LIST", "Subir lista de estudiantes"),
-    VIEW_SCHEDULES("VIEW_SCHEDULES", "Ver horarios");
+    VIEW_SCHEDULES("VIEW_SCHEDULES", "Ver horarios"),
+
+    SCORE_REGISTER("SCORE_REGISTER", "Registrar notas"),
+    SCORE_SELF_VIEW("SCORE_SELF_VIEW","Ver mis notas (Estudiante)"),
+    SCORE_CHILDREN_VIEW("SCORE_CHILDREN_VIEW", "Ver notas de mis hijos (Apoderados)"),
+    SCORE_HISTORY_VIEW("SCORE_HISTORY_VIEW", "Ver historial de notas"),
+    SCORE_AVERAGE_VIEW("SCORE_AVERAGE_VIEW", "Ver promedio de notas"),
+
+    GET_EVALUATION("GET_EVALUATION", "Ver evaluaciones"),
+    CREATE_EVALUATION("CREATE_EVALUATION", "Crear evaluaciones"),
+    UPDATE_EVALUATION("UPDATE_EVALUATION", "Actualizar evaluaciones"),
+    DELETE_EVALUATION("DELETE_EVALUATION","Eliminar evaluaciones");
 
 
     private final String code;

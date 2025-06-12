@@ -1,9 +1,12 @@
 package pe.getsemani.mikhipu.config;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.ApplicationArguments;
@@ -13,6 +16,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import pe.getsemani.mikhipu.assistance.entity.AssistanceSession;
+import pe.getsemani.mikhipu.assistance.repository.AssistanceSessionRepository;
 import pe.getsemani.mikhipu.persons.admin.Admin;
 import pe.getsemani.mikhipu.persons.person.entity.Person;
 import pe.getsemani.mikhipu.persons.person.enums.Gender;
@@ -28,6 +33,7 @@ import pe.getsemani.mikhipu.user.entity.User;
 import pe.getsemani.mikhipu.user.repository.UserRepository;
 
 @Component
+@RequiredArgsConstructor
 public class AdminInitializer implements ApplicationRunner {
     private static final Logger log = LoggerFactory.getLogger(AdminInitializer.class);
 
@@ -38,21 +44,7 @@ public class AdminInitializer implements ApplicationRunner {
     private final AdminRepository adminRepository;
     private final PasswordEncoder   passwordEncoder;
     private final PersonRepository personRepository;
-
-    public AdminInitializer(Environment env,
-                            RoleRepository roleRepo,
-                            PermissionRepository permRepo,
-                            UserRepository userRepo,
-                            AdminRepository adminRepository,
-                            PasswordEncoder passwordEncoder, PersonRepository personRepository) {
-        this.env             = env;
-        this.roleRepo        = roleRepo;
-        this.permRepo        = permRepo;
-        this.userRepo        = userRepo;
-        this.adminRepository      = adminRepository;
-        this.passwordEncoder = passwordEncoder;
-        this.personRepository = personRepository;
-    }
+    private final AssistanceSessionRepository assistanceSessionRepository;
 
     @Override
     @Transactional
@@ -61,6 +53,7 @@ public class AdminInitializer implements ApplicationRunner {
         initializePermissions();
         assignPermissionsToRoles();
         initializeAdminUserAndPerson();
+        initAssistanceSession();
     }
 
     private void initializeRoles() {
@@ -122,13 +115,43 @@ public class AdminInitializer implements ApplicationRunner {
                         PermissionConstants.GET_PERSONS,
                         PermissionConstants.GET_PERSON,
                         PermissionConstants.GET_ROLES,
-                        PermissionConstants.GET_ROLE
+                        PermissionConstants.GET_ROLE,
+                        PermissionConstants.GET_STUDENTS,
+                        PermissionConstants.GET_STUDENT,
+                        PermissionConstants.GET_COURSE,
+                        PermissionConstants.GET_COURSES,
+
+                        PermissionConstants.GET_EVALUATION,
+                        PermissionConstants.CREATE_EVALUATION,
+                        PermissionConstants.UPDATE_EVALUATION,
+                        PermissionConstants.DELETE_EVALUATION,
+
+                        PermissionConstants.SCORE_REGISTER,
+                        PermissionConstants.SCORE_HISTORY_VIEW,
+                        PermissionConstants.GET_TEACHERS
                 ),
                 RoleConstants.ESTUDIANTE,    List.of(
-                        PermissionConstants.GET_PERSONS
+                        PermissionConstants.GET_PERSONS,
+                        PermissionConstants.SCORE_AVERAGE_VIEW,
+                        PermissionConstants.SCORE_SELF_VIEW,
+                        PermissionConstants.GET_STUDENTS,
+                        PermissionConstants.GET_STUDENT,
+                        PermissionConstants.GET_COURSE,
+                        PermissionConstants.GET_COURSES,
+                        PermissionConstants.GET_EVALUATION,
+                        PermissionConstants.GET_TEACHERS
                 ),
                 RoleConstants.APODERADO,     List.of(
-                        PermissionConstants.GET_PERSONS
+                        PermissionConstants.GET_PERSONS,
+                        PermissionConstants.SCORE_AVERAGE_VIEW,
+                        PermissionConstants.SCORE_SELF_VIEW,
+                        PermissionConstants.GET_STUDENTS,
+                        PermissionConstants.GET_STUDENT,
+                        PermissionConstants.GET_COURSE,
+                        PermissionConstants.GET_COURSES,
+                        PermissionConstants.GET_TEACHERS,
+                        PermissionConstants.GET_EVALUATION,
+                        PermissionConstants.SCORE_CHILDREN_VIEW
                 )
         );
     }
@@ -173,6 +196,25 @@ public class AdminInitializer implements ApplicationRunner {
             admin.setPerson(savedPerson);
             adminRepository.save(admin);
             log.info("✔ Persona creada para admin: {} {}", savedPerson.getFirstName(), savedPerson.getLastName());
+        }
+    }
+
+    private void initAssistanceSession() {
+        boolean exists = assistanceSessionRepository.existsById(1L);
+
+        if (!exists) {
+            AssistanceSession assistanceSession1 = AssistanceSession.builder()
+                    .startEntryTime(LocalTime.parse("08:00"))
+                    .endEntryTime(LocalTime.parse("08:30"))
+                    .startExitTime(LocalTime.parse("13:00"))
+                    .endExitTime(LocalTime.parse("13:30"))
+                    .attendanceDeadline(LocalDateTime.parse("2025-12-30T23:00:00"))
+                    .active(true)
+                    .build();
+
+            assistanceSessionRepository.save(assistanceSession1);
+        } else {
+            System.out.println("La sesión con ID 1 ya existe, no se creará una nueva.");
         }
     }
 }
