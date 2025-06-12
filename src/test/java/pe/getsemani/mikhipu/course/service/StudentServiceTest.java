@@ -7,6 +7,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import pe.getsemani.mikhipu.assistance.repository.AssistanceRecordRepository;
 import pe.getsemani.mikhipu.persons.representative.dto.RepresentativeBasicDTO;
 import pe.getsemani.mikhipu.persons.representative.projection.RepresentativeBasicProjection;
 import pe.getsemani.mikhipu.persons.student.dto.StudentCreateDTO;
@@ -55,6 +56,7 @@ class StudentServiceTest {
     private RepresentativeBasicProjection projection;
     @Mock
     private PersonRepository personRepository;
+    @Mock private AssistanceRecordRepository assistanceRecordRepository;
 
 
     @InjectMocks

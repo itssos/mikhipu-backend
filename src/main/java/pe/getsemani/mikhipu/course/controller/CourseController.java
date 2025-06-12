@@ -3,6 +3,8 @@ package pe.getsemani.mikhipu.course.controller;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -35,10 +37,11 @@ public class CourseController {
         return ResponseEntity.ok(courseService.create(dto));
     }
 
-//    @PreAuthorize("hasAuthority('GET_COURSES')")
+    @PreAuthorize("hasAuthority('GET_COURSES')")
     @GetMapping
-    public ResponseEntity<List<CourseResponseDTO>> findAll() {
-        return ResponseEntity.ok(courseService.findAll());
+    public ResponseEntity<List<CourseResponseDTO>> findAll(Authentication authentication) {
+        String username = authentication.getName();
+        return ResponseEntity.ok(courseService.findAll(username));
     }
 
 //    @PreAuthorize("hasAuthority('GET_COURSE')")

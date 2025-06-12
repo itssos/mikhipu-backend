@@ -7,6 +7,8 @@ import pe.getsemani.mikhipu.exception.ResourceNotFoundException;
 import pe.getsemani.mikhipu.course.dto.CourseTeacherViewDTO;
 import pe.getsemani.mikhipu.course.dto.create.CourseCreateDTO;
 import pe.getsemani.mikhipu.course.dto.response.CourseResponseDTO;
+import pe.getsemani.mikhipu.persons.representative.entity.Representative;
+import pe.getsemani.mikhipu.persons.representative.repository.RepresentativeRepository;
 import pe.getsemani.mikhipu.persons.student.dto.StudentCourseViewDTO;
 import pe.getsemani.mikhipu.course.entity.Course;
 import pe.getsemani.mikhipu.persons.student.entity.Student;
@@ -24,6 +26,7 @@ import pe.getsemani.mikhipu.persons.teacher.repository.TeacherRepository;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -38,6 +41,7 @@ public class CourseService {
     private final CourseStudentRepository courseStudentRepository;
     private final StudentMapper studentMapper;
     private final CourseRelationRepository courseRelationRepository;
+    private final RepresentativeRepository representativeRepository;
 
     public CourseResponseDTO create(CourseCreateDTO dto) {
         Course course = courseMapper.toEntity(dto);
@@ -45,7 +49,45 @@ public class CourseService {
     }
 
 
-    public List<CourseResponseDTO> findAll() {
+    public List<CourseResponseDTO> findAll(String username) {
+        // 1. Si es docente: sus cursos (mainTeacher o teachers)
+        Optional<Teacher> teacherOpt = teacherRepository.findByPerson_User_Username(username);
+        if (teacherOpt.isPresent()) {
+            Teacher teacher = teacherOpt.get();
+            Set<Course> courses = new HashSet<>();
+            // MainTeacher
+            courses.addAll(courseRepository.findByMainTeacher_Id(teacher.getId()));
+            // Docente colaborador
+            courses.addAll(courseRepository.findByTeachers_Id(teacher.getId()));
+            return courses.stream()
+                    .map(courseMapper::toDto)
+                    .collect(Collectors.toList());
+        }
+
+        // 2. Si es estudiante: cursos donde es estudiante
+        Optional<Student> studentOpt = studentRepository.findByPerson_User_Username(username);
+        if (studentOpt.isPresent()) {
+            Student student = studentOpt.get();
+            List<Course> courses = courseRepository.findByStudents_Id(student.getId());
+            return courses.stream()
+                    .map(courseMapper::toDto)
+                    .collect(Collectors.toList());
+        }
+
+        // 3. Si es apoderado: cursos de los hijos
+        Optional<Representative> repOpt = representativeRepository.findByPerson_User_Username(username);
+        if (repOpt.isPresent()) {
+            Representative rep = repOpt.get();
+            Set<Course> courses = new HashSet<>();
+            for (Student s : rep.getStudents()) {
+                courses.addAll(courseRepository.findByStudents_Id(s.getId()));
+            }
+            return courses.stream()
+                    .map(courseMapper::toDto)
+                    .collect(Collectors.toList());
+        }
+
+        // 4. Admin u otros: todos los cursos
         return courseRepository.findAll().stream()
                 .map(courseMapper::toDto)
                 .collect(Collectors.toList());

@@ -57,4 +57,13 @@ public interface CourseRepository extends JpaRepository<Course, Long> {
 """, nativeQuery = true)
     List<CourseTeacherViewProjection> findTeachersByCourseId(@Param("courseId") Long courseId);
 
+    List<Course> findByMainTeacher_Id(Long teacherId);
+
+    List<Course> findByTeachers_Id(Long teacherId);
+
+    boolean existsByIdAndStudents_Id(Long courseId, Long studentId);
+
+    List<Course> findByStudents_Id(Long studentId);
+
+
 }
