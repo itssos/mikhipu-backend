@@ -7,6 +7,7 @@ import pe.getsemani.mikhipu.persons.student.enums.Section;
 @Data
 public class StudentCourseViewDTO {
     private Long id;
+    private int userId;
     private String fullName;
     private String dni;
     private Integer grade;

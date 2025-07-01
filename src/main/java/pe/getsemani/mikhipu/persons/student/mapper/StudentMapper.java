@@ -58,6 +58,7 @@ public class StudentMapper {
 
         StudentCourseViewDTO dto = new StudentCourseViewDTO();
         dto.setId(student.getId());
+        dto.setUserId(student.getPerson().getUser().getId());
         dto.setFullName(
                 student.getPerson().getFirstName() + " " + student.getPerson().getLastName()
         );

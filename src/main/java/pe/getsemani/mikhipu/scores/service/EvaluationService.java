@@ -136,6 +136,7 @@ public class EvaluationService {
 
             Specification<Evaluation> spec = courseIdsSpec
                     .and(EvaluationSpecification.hasYear(filter.getYear()))
+                    .and(EvaluationSpecification.hasCourseId(filter.getCourseId()))
                     .and(EvaluationSpecification.hasQuarter(filter.getQuarter()))
                     .and(EvaluationSpecification.hasType(filter.getType()))
                     .and(EvaluationSpecification.hasDateBetween(filter.getStartDate(), filter.getEndDate()));
@@ -163,6 +164,7 @@ public class EvaluationService {
 
             Specification<Evaluation> spec = courseIdsSpec
                     .and(EvaluationSpecification.hasYear(filter.getYear()))
+                    .and(EvaluationSpecification.hasCourseId(filter.getCourseId()))
                     .and(EvaluationSpecification.hasQuarter(filter.getQuarter()))
                     .and(EvaluationSpecification.hasType(filter.getType()))
                     .and(EvaluationSpecification.hasDateBetween(filter.getStartDate(), filter.getEndDate()));
@@ -194,6 +196,7 @@ public class EvaluationService {
 
             Specification<Evaluation> spec = courseIdsSpec
                     .and(EvaluationSpecification.hasYear(filter.getYear()))
+                    .and(EvaluationSpecification.hasCourseId(filter.getCourseId()))
                     .and(EvaluationSpecification.hasQuarter(filter.getQuarter()))
                     .and(EvaluationSpecification.hasType(filter.getType()))
                     .and(EvaluationSpecification.hasDateBetween(filter.getStartDate(), filter.getEndDate()));
@@ -205,6 +208,7 @@ public class EvaluationService {
         // 4. Admin u otro (full access con todos los filtros)
         Specification<Evaluation> spec = Specification.where(EvaluationSpecification.hasCourseId(filter.getCourseId()))
                 .and(EvaluationSpecification.hasYear(filter.getYear()))
+                .and(EvaluationSpecification.hasCourseId(filter.getCourseId()))
                 .and(EvaluationSpecification.hasQuarter(filter.getQuarter()))
                 .and(EvaluationSpecification.hasType(filter.getType()))
                 .and(EvaluationSpecification.hasDateBetween(filter.getStartDate(), filter.getEndDate()))

@@ -174,6 +174,10 @@ public class CourseService {
         return courseRepository.findTeachersByCourseId(courseId).stream()
                 .map(proj -> {
                     CourseTeacherViewDTO dto = new CourseTeacherViewDTO();
+
+                    Optional<Teacher> teacher = teacherRepository.findById(proj.getId());
+                    teacher.ifPresent(v -> dto.setUserId(v.getPerson().getUser().getId()));
+
                     dto.setId(proj.getId());
                     dto.setFullName(proj.getFullName());
                     dto.setCode(proj.getCode());
@@ -189,6 +193,10 @@ public class CourseService {
                 .map(proj -> {
                     StudentCourseViewDTO dto = new StudentCourseViewDTO();
                     dto.setId(proj.getId());
+
+                    Optional<Student> student = studentRepository.findById(proj.getId());
+                    student.ifPresent(value -> dto.setUserId(value.getPerson().getUser().getId()));
+
                     dto.setFullName(proj.getFullName());
                     dto.setDni(proj.getDni());
                     dto.setGrade(proj.getGrade());
