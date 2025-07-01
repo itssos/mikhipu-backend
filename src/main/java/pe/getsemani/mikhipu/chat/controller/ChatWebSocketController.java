@@ -36,14 +36,15 @@ public class ChatWebSocketController {
         }
         message.setTimestamp(LocalDateTime.now());
         message.setType("DIRECT");
-        message.setSenderId((long) getUserId(principal.getName())); // asegúrate de setear senderId
+        message.setSenderId((long) getUserId(principal.getName())); // set senderId
 
-        // Guarda el mensaje en la BD
-        chatMessageRepository.save(message);
-
+        // --- Cambia el ORDEN: primero verifica que el destinatario existe
         String toUsername = userRepository.findById(message.getToUserId())
                 .map(User::getUsername)
                 .orElseThrow(() -> new IllegalArgumentException("Destinatario no existe"));
+
+        // Ahora sí: guarda el mensaje
+        chatMessageRepository.save(message);
 
         // Envía a destinatario
         messagingTemplate.convertAndSendToUser(toUsername, "/queue/messages", message);
