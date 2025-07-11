@@ -23,7 +23,7 @@ public class ChatFileController {
         String filename = UUID.randomUUID() + "_" + file.getOriginalFilename();
         Path path = Paths.get("uploads", filename);
         try (InputStream is = file.getInputStream()) {
-            Files.createDirectories(path.getParent()); // <--- CREA la carpeta si no existe
+            Files.createDirectories(path.getParent());
             Files.copy(is, path, StandardCopyOption.REPLACE_EXISTING);
         } catch (IOException e) {
             throw new RuntimeException("Error al guardar archivo", e);

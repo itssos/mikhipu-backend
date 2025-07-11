@@ -11,6 +11,7 @@ import pe.getsemani.mikhipu.persons.teacher.repository.TeacherRepository;
 import pe.getsemani.mikhipu.user.entity.User;
 import pe.getsemani.mikhipu.user.repository.UserRepository;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -141,5 +142,29 @@ public class ChatPermissionService {
         System.out.println("[WARN] Usuario '" + user.getUsername() + "' no está registrado ni como estudiante ni como profesor.");
         return Collections.emptyList();
     }
+
+
+    /**
+     * Devuelve todos los usuarios (profesor principal + estudiantes) de un curso.
+     */
+    public List<User> getUsersOfCourse(Long courseId) {
+        List<User> users = new ArrayList<>();
+        Course course = courseRepository.findById(courseId)
+                .orElseThrow(() -> new NoSuchElementException("Curso no encontrado: " + courseId));
+        // Agrega el profe principal
+        if (course.getMainTeacher() != null && course.getMainTeacher().getPerson() != null) {
+            User teacherUser = course.getMainTeacher().getPerson().getUser();
+            if (teacherUser != null) users.add(teacherUser);
+        }
+        // Agrega todos los estudiantes
+        List<Student> students = courseRepository.findStudentsByCourseId(courseId);
+        for (Student student : students) {
+            if (student.getPerson() != null && student.getPerson().getUser() != null) {
+                users.add(student.getPerson().getUser());
+            }
+        }
+        return users;
+    }
+
 
 }

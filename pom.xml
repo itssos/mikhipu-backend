@@ -181,6 +181,19 @@
 			<artifactId>jackson-databind</artifactId>
 		</dependency>
 
+		<dependency>
+			<groupId>nl.martijndwars</groupId>
+			<artifactId>web-push</artifactId>
+			<version>5.1.1</version>
+		</dependency>
+
+		<!-- Para soporte EC Private/Public Key (Web Push VAPID) -->
+		<dependency>
+			<groupId>org.bouncycastle</groupId>
+			<artifactId>bcprov-jdk18on</artifactId>
+			<version>1.78.1</version> <!-- Usa la última estable -->
+		</dependency>
+
 	</dependencies>
 
 	<build>

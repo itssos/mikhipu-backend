@@ -43,7 +43,7 @@ class ChatWebSocketControllerTest {
     // --------- Unitario: Mensaje directo ---------
     @Test
     @DisplayName("Unitario: handleDirectMessage - éxito")
-    void testHandleDirectMessageSuccess() {
+    void testHandleDirectMessageSuccess() throws Exception {
         // Arrange
         Principal principal = mockPrincipal("profe");
         ChatMessage msg = new ChatMessage();
@@ -97,7 +97,7 @@ class ChatWebSocketControllerTest {
     // --------- Unitario: Mensaje curso ---------
     @Test
     @DisplayName("Unitario: handleCourseMessage - éxito")
-    void testHandleCourseMessageSuccess() {
+    void testHandleCourseMessageSuccess() throws Exception {
         Principal principal = mockPrincipal("alumno");
         ChatMessage msg = new ChatMessage();
         Long courseId = 77L;
@@ -145,7 +145,7 @@ class ChatWebSocketControllerTest {
     // --------- TDD ---------
     @Test
     @DisplayName("TDD: Todo mensaje directo debe ser guardado y enviado a ambos usuarios")
-    void tddDirectMessageGuardaYNotifica() {
+    void tddDirectMessageGuardaYNotifica() throws Exception {
         Principal principal = mockPrincipal("tdduser");
         ChatMessage msg = new ChatMessage();
         msg.setToUserId(8);
